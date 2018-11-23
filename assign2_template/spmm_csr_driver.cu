@@ -88,6 +88,41 @@ void host_csr_spmm(CSR &mat, double * dmat_in, double * dmat_out, unsigned int K
     }
 }
 
+//Emin Code start
+__global__ void dev_csr_spmm(const CSR &A , double * dmat_in, double* dmat_out , unsigned int K){
+
+
+      int iy= blockIdx.y*blockDim.y + threadIdx.y ;
+      int ix= blockIdx.x*blockDim.x+  threadIdx.x ;
+
+      int numberOfRowCSR = A.nrows;
+
+      //const int row = blockIdx.x * blockDim.x + threadIdx.x ;
+
+      if ( iy < numberOfRowCSR && ix < K) {
+
+        double sum=0.0;
+
+        unsigned int row_start = A.row_indx[iy] ;
+
+        unsigned int row_finish = A.row_indx[iy + 1] ;
+
+
+
+        for (unsigned i = row_start; i < row_end; i++) {
+          /* code */
+          sum += A.values[i] * dmat_in[A.col_id[i]][ix] ;
+        }
+
+        dmat_out[ix][iy] = sum ;
+
+      }
+
+}
+
+
+
+
 int main(int argc, char *argv[]) {
     if(argc < 3) {
         std::cerr << "usage ./exec inputfile K  " << std::endl;
