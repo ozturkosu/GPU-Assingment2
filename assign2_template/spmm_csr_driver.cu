@@ -104,8 +104,7 @@ __global__ void dev_csr_spmm(const CSR &A , double * dmat_in, double* dmat_out ,
         double sum=0.0;
 
         unsigned int row_start = A.row_indx[iy] ;
-
-        unsigned int row_finish = A.row_indx[iy + 1] ;
+        unsigned int row_end = A.row_indx[iy + 1] ;
 
 
 

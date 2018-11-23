@@ -1,6 +1,6 @@
 /*
  * sparse_representation.hpp
- * Copyright (C) 2018 
+ * Copyright (C) 2018
  * 	P Sadayappan (saday) <psaday@gmail.com>
  * 	Aravind SUKUMARAN RAJAM (asr) <aravind_sr@outlook.com>
  *
@@ -13,7 +13,7 @@
 struct CSR
 {
 	unsigned int* row_indx{};
-        unsigned int* col_id{}; 	
+  unsigned int* col_id{};
 	double* values{};
 
 	unsigned int nrows{};
@@ -23,7 +23,7 @@ struct CSR
 
 struct CSC
 {
-        unsigned int* col_indx{}; 	
+  unsigned int* col_indx{};
 	unsigned int* row_id{};
 	double* values{};
 
@@ -35,7 +35,7 @@ struct CSC
 struct COO
 {
 	unsigned int* row_id{};
-        unsigned int* col_id{}; 	
+  unsigned int* col_id{}; 	
 	double* values{};
 
 	unsigned int nrows{};
