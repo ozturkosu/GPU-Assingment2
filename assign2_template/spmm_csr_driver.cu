@@ -95,7 +95,7 @@ void host_csr_spmm(CSR &mat, double * dmat_in, double * dmat_out,  int K) {
 }
 
 //Emin Code start
-__global__ void dev_csr_spmm( int * deviceCSRrow_indx ,  int * deviceCSRcol_id  ,  int * deviceCSRvalues,
+__global__ void dev_csr_spmm( int * deviceCSRrow_indx ,  int * deviceCSRcol_id  ,  double * deviceCSRvalues,
    double * dmat_in_device, double* dmat_out_device ,  int K ,  int device_nrows ){
 
 
@@ -196,9 +196,9 @@ int main(int argc, char *argv[]) {
     cudaMemcpy(deviceCSRcol_id, mat.col_id , mat.ncols * sizeof( int) , cudaMemcpyHostToDevice) ;
     cudaMemcpy(deviceCSRvalues , mat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice) ;
 
-    cudaMemcpy(device_nrows , mat.nrows , sizeof( int) , cudaMemcpyHostToDevice) ;
-    cudaMemcpy(device_ncols , mat.ncols , sizeof( int) , cudaMemcpyHostToDevice) ;
-    cudaMemcpy(device_nnz   , mat.nnz   , sizeof( int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(device_nrows , mat.nrows , sizeof(int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(device_ncols , mat.ncols , sizeof(int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(device_nnz   , mat.nnz   , sizeof(int) , cudaMemcpyHostToDevice) ;
     //cudaMemcpy(temMat->nrows , mat.nrows , 1*sizeof( int) , cudaMemcpyHostToDevice) ;
     //cudaMemcpy(temMat->ncols , mat.ncols , 1*sizeof( int) , cudaMemcpyHostToDevice) ;
     //cudaMemcpy(temMat->nnz , mat.nnz , 1*sizeof( int) , cudaMemcpyHostToDevice) ;
