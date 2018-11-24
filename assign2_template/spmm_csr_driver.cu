@@ -228,16 +228,16 @@ int main(int argc, char *argv[]) {
 
 
     //td::cout << "replace one argument to the below function with the values from gpu " << std::endl;
-    printf("CPU output\n", );
+    printf("CPU output\n" );
     print_dmat(dmat_out);
-    printf("Cuda output\n", );
+    printf("Cuda output\n" );
     print_dmat(dmat_out_GPU);
     check_dmat(dmat_out, dmat_out_GPU, mat.nrows, K);
 
     //print_dmat(dmat_out, mat.nrows, K);
 
 
-    free(mat.row_indx);  
+    free(mat.row_indx);
     free(mat.col_id);
     free(mat.values);
 
