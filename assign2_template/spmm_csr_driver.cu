@@ -175,9 +175,9 @@ int main(int argc, char *argv[]) {
     cudaMalloc((void**) &deviceCSRcol_id , mat.ncols * sizeof(int)) ;
     cudaMalloc((void**) &deviceCSRvalues , mat.nnz * sizeof(double)) ;
 
-    cudaMalloc((void**) &device_nrows, mat.nrows , a*sizeof(int));
-    cudaMalloc((void**) &device_ncols, mat.ncols , a*sizeof(int));
-    cudaMalloc((void**) &device_nnz, mat.nnz , a*sizeof(int));
+    cudaMalloc((void**) &device_nrows,  a*sizeof(int));
+    cudaMalloc((void**) &device_ncols,  a*sizeof(int));
+    cudaMalloc((void**) &device_nnz,  a*sizeof(int));
 
     //cudaMalloc((void**) &(temMat->values) , mat.nnz * sizeof(double)) ;
     //cudaMalloc((void**) &(temMat->row_indx) , mat.nrows * sizeof( int)) ;
