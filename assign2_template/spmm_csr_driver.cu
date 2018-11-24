@@ -165,9 +165,9 @@ int main(int argc, char *argv[]) {
      int* deviceCSRcol_id;
     double* deviceCSRvalues;
 
-     int* device_nrows;
-     int* device_ncols;
-     int* device_nnz;
+     //int device_nrows;
+     //int device_ncols;
+     //int device_nnz;
 
      int a=1;
 
@@ -175,9 +175,9 @@ int main(int argc, char *argv[]) {
     cudaMalloc((void**) &deviceCSRcol_id , mat.ncols * sizeof(int)) ;
     cudaMalloc((void**) &deviceCSRvalues , mat.nnz * sizeof(double)) ;
 
-    cudaMalloc((void**) &device_nrows,  a*sizeof(int));
-    cudaMalloc((void**) &device_ncols,  a*sizeof(int));
-    cudaMalloc((void**) &device_nnz,  a*sizeof(int));
+    //cudaMalloc((void**) &device_nrows,  a*sizeof(int));
+    //cudaMalloc((void**) &device_ncols,  a*sizeof(int));
+    //cudaMalloc((void**) &device_nnz,  a*sizeof(int));
 
     //cudaMalloc((void**) &(temMat->values) , mat.nnz * sizeof(double)) ;
     //cudaMalloc((void**) &(temMat->row_indx) , mat.nrows * sizeof( int)) ;
@@ -196,9 +196,9 @@ int main(int argc, char *argv[]) {
     cudaMemcpy(deviceCSRcol_id, mat.col_id , mat.ncols * sizeof( int) , cudaMemcpyHostToDevice) ;
     cudaMemcpy(deviceCSRvalues , mat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice) ;
 
-    cudaMemcpy(device_nrows , mat.nrows , sizeof(int) , cudaMemcpyHostToDevice) ;
-    cudaMemcpy(device_ncols , mat.ncols , sizeof(int) , cudaMemcpyHostToDevice) ;
-    cudaMemcpy(device_nnz   , mat.nnz   , sizeof(int) , cudaMemcpyHostToDevice) ;
+    //cudaMemcpy(device_nrows , mat.nrows , a*sizeof(int) , cudaMemcpyHostToDevice) ;
+    //cudaMemcpy(device_ncols , mat.ncols , a*sizeof(int) , cudaMemcpyHostToDevice) ;
+    //cudaMemcpy(device_nnz   , mat.nnz   , sizeof(int) , cudaMemcpyHostToDevice) ;
     //cudaMemcpy(temMat->nrows , mat.nrows , 1*sizeof( int) , cudaMemcpyHostToDevice) ;
     //cudaMemcpy(temMat->ncols , mat.ncols , 1*sizeof( int) , cudaMemcpyHostToDevice) ;
     //cudaMemcpy(temMat->nnz , mat.nnz , 1*sizeof( int) , cudaMemcpyHostToDevice) ;
@@ -222,7 +222,7 @@ int main(int argc, char *argv[]) {
     dim3 dimGrid((K-1) / TILE_WIDTH + 1 , (mat.nrows -1)/ TILE_WIDTH +1 , 1  ) ;
     dim3 dimBlock(TILE_WIDTH , TILE_WIDTH , 1) ;
 
-    dev_csr_spmm<<<dimGrid , dimBlock>>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , device_nrows) ;
+    dev_csr_spmm<<<dimGrid , dimBlock>>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows) ;
 
     cudaMemcpy(dmat_out_GPU , dmat_out_device ,mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
 
