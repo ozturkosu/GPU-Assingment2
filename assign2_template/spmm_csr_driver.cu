@@ -160,9 +160,9 @@ int main(int argc, char *argv[]) {
     cudaMalloc((void**) &temMat.col_id , mat.ncols * sizeof(int)) ;
 
     //Initialize device addresses since it can not be accessed directly
-    cudaMemcpy(temMat.values , mat->values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice) ;
-    cudaMemcpy(temMat.row_indx , mat->row_indx , mat.nrows * sizeof(int) , cudaMemcpyHostToDevice) ;
-    cudaMemcpy(temMat.col_indx , mat->col_id , mat.ncols * sizeof(int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(temMat->values , mat->values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(temMat->row_indx , mat->row_indx , mat.nrows * sizeof(int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(temMat->col_indx , mat->col_id , mat.ncols * sizeof(int) , cudaMemcpyHostToDevice) ;
 
     CSR A;
     cudaMemcpyToSymbol( A , temMat , sizeof(CSR)) ;
