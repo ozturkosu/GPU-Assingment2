@@ -234,5 +234,13 @@ int main(int argc, char *argv[]) {
     free(mat.row_indx);
     free(mat.col_id);
     free(mat.values);
+
+    cudaFree(deviceCSRrow_indx) ;
+    cudaFree(deviceCSRcol_id) ;
+    cudaFree(deviceCSRvalues) ;
+
+    cudaFree(device_nrows) ;
+    cudaFree(device_ncols) ;
+    cudaFree(device_nnz ) ;
     return 0;
 }
