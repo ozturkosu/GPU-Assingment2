@@ -17,9 +17,9 @@
 
 #define TILE_WIDTH 32
 
-void check_dmat(double* a, double *b, unsigned int n, unsigned int K, bool quit_on_err = true ) {
-    for (unsigned int i = 0; i < n; ++i) {
-        for (unsigned int k = 0; k < K; ++k) {
+void check_dmat(double* a, double *b,  int n,  int K, bool quit_on_err = true ) {
+    for ( int i = 0; i < n; ++i) {
+        for ( int k = 0; k < K; ++k) {
             if(std::abs(a[i * K + k] - b[i * K + k]) > 1e-1) {
                 std::cerr << "Possible error at " << i << std::endl;
 
@@ -36,24 +36,24 @@ void check_dmat(double* a, double *b, unsigned int n, unsigned int K, bool quit_
         std::cout << "Check error messages to see if verification succeeded. (No error msg == success)\n";
 }
 
-static unsigned int g_seed = 0X4B1D;
+static  int g_seed = 0X4B1D;
 inline int fastrand() {
     g_seed = (214013 * g_seed + 2531011);
     return (g_seed >> 16) & 0x7FFF;
 }
 
-void init_dmat(double *a, unsigned int n, unsigned int K, double offset) {
-    for (unsigned int i = 0; i < n; ++i) {
-        for (unsigned int k = 0; k < K; ++k) {
+void init_dmat(double *a,  int n,  int K, double offset) {
+    for ( int i = 0; i < n; ++i) {
+        for ( int k = 0; k < K; ++k) {
             a[i * K + k]  = i * K + k + offset;
             //a[i * K + j]  = fastrand() + offset;
         }
     }
 }
 
-void print_dmat(double *a, unsigned int n, unsigned int K) {
-    for (unsigned int i = 0; i < n; ++i) {
-        for (unsigned int j = 0; j < K; ++j) {
+void print_dmat(double *a,  int n,  int K) {
+    for ( int i = 0; i < n; ++i) {
+        for ( int j = 0; j < K; ++j) {
             std::cout << a[i * K + j]   << ' ';
         }
         std::cout << '\n';
@@ -61,11 +61,11 @@ void print_dmat(double *a, unsigned int n, unsigned int K) {
 }
 
 void print_CSR(CSR &mat) {
-    for (unsigned int r = 0; r < mat.nrows; ++r) {
-        unsigned int row_start = mat.row_indx[r];
-        unsigned int row_end = mat.row_indx[r + 1];
-        for (unsigned int j = row_start; j < row_end; ++j) {
-            unsigned int col_id = mat.col_id[j];
+    for ( int r = 0; r < mat.nrows; ++r) {
+         int row_start = mat.row_indx[r];
+         int row_end = mat.row_indx[r + 1];
+        for ( int j = row_start; j < row_end; ++j) {
+             int col_id = mat.col_id[j];
             double val = mat.values[j];
 
 	    std::cout << r << ' ' << col_id << ' ' <<  val << '\n';
@@ -73,20 +73,20 @@ void print_CSR(CSR &mat) {
     }
 }
 
-void host_csr_spmm(CSR &mat, double * dmat_in, double * dmat_out, unsigned int K) {
-    for (unsigned int r = 0; r < mat.nrows; ++r) {
-        unsigned int row_start = mat.row_indx[r];
-        unsigned int row_end = mat.row_indx[r + 1];
+void host_csr_spmm(CSR &mat, double * dmat_in, double * dmat_out,  int K) {
+    for ( int r = 0; r < mat.nrows; ++r) {
+         int row_start = mat.row_indx[r];
+         int row_end = mat.row_indx[r + 1];
 
-        for (unsigned int k = 0; k < K; ++k) {
+        for ( int k = 0; k < K; ++k) {
             dmat_out[r * K + k] = 0;
         }
 
-        for (unsigned int j = row_start; j < row_end; ++j) {
-            unsigned int col_id = mat.col_id[j];
+        for ( int j = row_start; j < row_end; ++j) {
+             int col_id = mat.col_id[j];
             double val = mat.values[j];
 
-            for (unsigned int k = 0; k < K; ++k) {
+            for ( int k = 0; k < K; ++k) {
                 dmat_out[r * K + k] += val * dmat_in[col_id * K + k];
             }
         }
@@ -95,8 +95,8 @@ void host_csr_spmm(CSR &mat, double * dmat_in, double * dmat_out, unsigned int K
 }
 
 //Emin Code start
-__global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * deviceCSRcol_id  , unsigned int * deviceCSRvalues,
-   double * dmat_in_device, double* dmat_out_device , unsigned int K , unsigned int device_nrows ){
+__global__ void dev_csr_spmm( int * deviceCSRrow_indx ,  int * deviceCSRcol_id  ,  int * deviceCSRvalues,
+   double * dmat_in_device, double* dmat_out_device ,  int K ,  int device_nrows ){
 
 
       int iy= blockIdx.y*blockDim.y + threadIdx.y ;
@@ -104,20 +104,20 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
 
       //int numberOfRowCSR = A.nrows;
       int numberOfRowCSR = device_nrows ;
-      unsigned colId;
+       colId;
       //const int row = blockIdx.x * blockDim.x + threadIdx.x ;
 
       if ( iy < numberOfRowCSR && ix < K) {
 
         double sum=0.0;
 
-        //unsigned int row_start = A.row_indx[iy] ;
-        unsigned int row_start = deviceCSRrow_indx[iy];
-        //unsigned int row_end = A.row_indx[iy + 1] ;
-        unsigned int row_end = deviceCSRrow_indx[iy+1] ;
+        // int row_start = A.row_indx[iy] ;
+         int row_start = deviceCSRrow_indx[iy];
+        // int row_end = A.row_indx[iy + 1] ;
+         int row_end = deviceCSRrow_indx[iy+1] ;
 
 
-        for (unsigned i = row_start; i < row_end; i++) {
+        for ( i = row_start; i < row_end; i++) {
           /* code */
           //colId= A.col_id[i] ;
           colId = deviceCSRcol_id[i] ;
@@ -140,7 +140,7 @@ int main(int argc, char *argv[]) {
         exit(-1);
     }
 
-    unsigned int K = std::atoi(argv[2]);
+     int K = std::atoi(argv[2]);
     CSR mat = read_matrix_market_to_CSR(argv[1]);
     //print_CSR(mat);
     std::cout << mat.nrows << ' ' << mat.ncols << ' ' << mat.nnz << ' ' << K << '\n';
@@ -161,45 +161,45 @@ int main(int argc, char *argv[]) {
     //temMat.->ncols = mat.ncols ;
     //temMat.->nnz = mat.nnz ;
 
-    unsigned int* deviceCSRrow_indx;
-    unsigned int* deviceCSRcol_id;
+     int* deviceCSRrow_indx;
+     int* deviceCSRcol_id;
     double* deviceCSRvalues;
 
-    unsigned int* device_nrows;
-    unsigned int* device_ncols;
-    unsigned int* nnz;
+     int* device_nrows;
+     int* device_ncols;
+     int* nnz;
 
-    cudaMalloc((void**) &deviceCSRrow_indx ,(mat.nrows +1) * sizeof(unsigned int)) ;
-    cudaMalloc((void**) &deviceCSRcol_id , mat.ncols * sizeof(unsigned int)) ;
+    cudaMalloc((void**) &deviceCSRrow_indx ,(mat.nrows +1) * sizeof( int)) ;
+    cudaMalloc((void**) &deviceCSRcol_id , mat.ncols * sizeof( int)) ;
     cudaMalloc((void**) &deviceCSRvalues , mat.nnz * sizeof(double)) ;
 
-    cudaMalloc((void**) &device_nrows, mat.nrows , sizeof(unsigned int));
-    cudaMalloc((void**) &device_ncols, mat.ncols , sizeof(unsigned int));
-    cudaMalloc((void**) &device_nnz, mat.nnz , sizeof(unsigned int));
+    cudaMalloc((void**) &device_nrows, mat.nrows , sizeof( int));
+    cudaMalloc((void**) &device_ncols, mat.ncols , sizeof( int));
+    cudaMalloc((void**) &device_nnz, mat.nnz , sizeof( int));
 
     //cudaMalloc((void**) &(temMat->values) , mat.nnz * sizeof(double)) ;
-    //cudaMalloc((void**) &(temMat->row_indx) , mat.nrows * sizeof(unsigned int)) ;
-    //cudaMalloc((void**) &(temMat->col_id) , mat.ncols * sizeof(unsigned int)) ;
+    //cudaMalloc((void**) &(temMat->row_indx) , mat.nrows * sizeof( int)) ;
+    //cudaMalloc((void**) &(temMat->col_id) , mat.ncols * sizeof( int)) ;
 
-    //cudaMalloc((void**) &(temMat->nrows) , sizeof(unsigned int)) ;
-    //cudaMalloc((void**) &(temMat->ncols) , sizeof(unsigned int)) ;
-    //cudaMalloc((void**) &(temMat->nnz) , sizeof(unsigned int)) ;
+    //cudaMalloc((void**) &(temMat->nrows) , sizeof( int)) ;
+    //cudaMalloc((void**) &(temMat->ncols) , sizeof( int)) ;
+    //cudaMalloc((void**) &(temMat->nnz) , sizeof( int)) ;
 
     //Initialize device addresses since it can not be accessed directly
     //cudaMemcpy(temMat->values , mat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice) ;
-    //cudaMemcpy(temMat->row_indx , mat.row_indx , mat.nrows * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
-    //cudaMemcpy(temMat->col_id , mat.col_id , mat.ncols * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
+    //cudaMemcpy(temMat->row_indx , mat.row_indx , mat.nrows * sizeof( int) , cudaMemcpyHostToDevice) ;
+    //cudaMemcpy(temMat->col_id , mat.col_id , mat.ncols * sizeof( int) , cudaMemcpyHostToDevice) ;
 
-    cudaMemcpy(deviceCSRrow_indx , mat.row_indx ,  mat.nrows * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
-    cudaMemcpy(deviceCSRcol_id, mat.col_id , mat.ncols * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(deviceCSRrow_indx , mat.row_indx ,  mat.nrows * sizeof( int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(deviceCSRcol_id, mat.col_id , mat.ncols * sizeof( int) , cudaMemcpyHostToDevice) ;
     cudaMemcpy(deviceCSRvalues , mat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice) ;
 
-    cudaMemcpy(device_nrows , mat.nrows , sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
-    cudaMemcpy(device_ncols , mat.ncols , sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
-    cudaMemcpy(device_nnz   , mat.nnz   , sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
-    //cudaMemcpy(temMat->nrows , mat.nrows , 1*sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
-    //cudaMemcpy(temMat->ncols , mat.ncols , 1*sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
-    //cudaMemcpy(temMat->nnz , mat.nnz , 1*sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(device_nrows , mat.nrows , sizeof( int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(device_ncols , mat.ncols , sizeof( int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(device_nnz   , mat.nnz   , sizeof( int) , cudaMemcpyHostToDevice) ;
+    //cudaMemcpy(temMat->nrows , mat.nrows , 1*sizeof( int) , cudaMemcpyHostToDevice) ;
+    //cudaMemcpy(temMat->ncols , mat.ncols , 1*sizeof( int) , cudaMemcpyHostToDevice) ;
+    //cudaMemcpy(temMat->nnz , mat.nnz , 1*sizeof( int) , cudaMemcpyHostToDevice) ;
 
     //CSR A;
     //cudaMemcpyToSymbol( A , temMat , sizeof(CSR)) ;
@@ -210,7 +210,7 @@ int main(int argc, char *argv[]) {
     double *dmat_out_device ;
     cudaMalloc((void**) &dmat_out_device, mat.nrows * K * sizeof(double)) ;
 
-    //copt to device
+    //copy to device
     cudaMemcpy( dmat_in_device , dmat_in , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
     cudaMemcpy( dmat_out_device, dmat_out, mat.nrows * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
 

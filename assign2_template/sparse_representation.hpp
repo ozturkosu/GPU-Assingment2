@@ -12,36 +12,36 @@
 
 struct CSR
 {
-	unsigned int* row_indx{};
-  unsigned int* col_id{};
-	double* values{};
+  int* row_indx[];
+  int* col_id[];
+	double* values[];
 
-	unsigned int nrows{};
-	unsigned int ncols{};
-	unsigned int nnz{};
+  int nrows;
+  int ncols;
+  int nnz;
 };
 
 
 struct CSC
 {
-  unsigned int* col_indx{};
-	unsigned int* row_id{};
-	double* values{};
+  int* col_indx[];
+  int* row_id[];
+	double* values[];
 
-	unsigned int nrows{};
-	unsigned int ncols{};
-	unsigned int nnz{};
+	int nrows;
+  int ncols;
+  int nnz;
 };
 
 struct COO
 {
-	unsigned int* row_id{};
-  unsigned int* col_id{};
-	double* values{};
+  int* row_id[];
+  int* col_id[];
+	double* values[];
 
-	unsigned int nrows{};
-	unsigned int ncols{};
-	unsigned int nnz{};
+  int nrows;
+  int ncols;
+  int nnz;
 };
 
 #endif /* !SPARSE_REPRESENTATION_HPP */
