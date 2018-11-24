@@ -117,7 +117,7 @@ __global__ void dev_csr_spmm( int * deviceCSRrow_indx ,  int * deviceCSRcol_id  
          int row_end = deviceCSRrow_indx[iy+1] ;
 
 
-        for ( i = row_start; i < row_end; i++) {
+        for (int i = row_start; i < row_end; i++) {
           /* code */
           //colId= A.col_id[i] ;
           colId = deviceCSRcol_id[i] ;
@@ -167,15 +167,15 @@ int main(int argc, char *argv[]) {
 
      int* device_nrows;
      int* device_ncols;
-     int* nnz;
+     int* device_nnz;
 
-    cudaMalloc((void**) &deviceCSRrow_indx ,(mat.nrows +1) * sizeof( int)) ;
-    cudaMalloc((void**) &deviceCSRcol_id , mat.ncols * sizeof( int)) ;
+    cudaMalloc((void**) &deviceCSRrow_indx ,(mat.nrows +1) * sizeof(int)) ;
+    cudaMalloc((void**) &deviceCSRcol_id , mat.ncols * sizeof(int)) ;
     cudaMalloc((void**) &deviceCSRvalues , mat.nnz * sizeof(double)) ;
 
-    cudaMalloc((void**) &device_nrows, mat.nrows , sizeof( int));
-    cudaMalloc((void**) &device_ncols, mat.ncols , sizeof( int));
-    cudaMalloc((void**) &device_nnz, mat.nnz , sizeof( int));
+    cudaMalloc((void**) &device_nrows, mat.nrows , sizeof(int));
+    cudaMalloc((void**) &device_ncols, mat.ncols , sizeof(int));
+    cudaMalloc((void**) &device_nnz, mat.nnz , sizeof(int));
 
     //cudaMalloc((void**) &(temMat->values) , mat.nnz * sizeof(double)) ;
     //cudaMalloc((void**) &(temMat->row_indx) , mat.nrows * sizeof( int)) ;
