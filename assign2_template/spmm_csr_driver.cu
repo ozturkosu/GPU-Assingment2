@@ -220,7 +220,7 @@ int main(int argc, char *argv[]) {
     dim3 dimGrid((K-1) / TILE_WIDTH + 1 , (mat.nrows -1)/ TILE_WIDTH +1 , 1  ) ;
     dim3 dimBlock(TILE_WIDTH , TILE_WIDTH , 1) ;
 
-    dev_csr_spmm<<<dimGrid , dimBlock>>>(temMat , dmat_in_device , dmat_out_device , K) ;
+    dev_csr_spmm<<<dimGrid , dimBlock>>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , device_nrows) ;
 
     cudaMemcpy(dmat_out_GPU , dmat_out_device ,mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
 
