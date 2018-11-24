@@ -226,6 +226,9 @@ int main(int argc, char *argv[]) {
 
     //std::cout << "GPU out matrix before kernel\n";
     //print_dmat(dmat_out_GPU,  mat.nrows , K);
+
+    print_CSR(mat);
+    
     cudaMemcpy(dmat_out_GPU , dmat_out_device ,mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
 
 
