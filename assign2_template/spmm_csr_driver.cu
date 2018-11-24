@@ -126,7 +126,7 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
         }
 
         //dmat_out[ix][iy] = sum ;
-        dmat_out_device[ix * K + iy] = sum ;
+        dmat_out_device[iy * K + ix] = sum ;
       }
 
 }
