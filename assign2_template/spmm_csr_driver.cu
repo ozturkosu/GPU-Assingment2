@@ -170,9 +170,9 @@ int main(int argc, char *argv[]) {
     cudaMemcpy(temMat->row_indx , mat.row_indx , mat.nrows * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
     cudaMemcpy(temMat->col_id , mat.col_id , mat.ncols * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
 
-    cudaMemcpy(temMat->nrows , mat.nrows , sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
-    cudaMemcpy(temMat->ncols , mat.ncols , sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
-    cudaMemcpy(temMat->nnz , mat.nnz , sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(temMat->nrows , mat.nrows , 1*sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(temMat->ncols , mat.ncols , 1*sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(temMat->nnz , mat.nnz , 1*sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
 
     //CSR A;
     //cudaMemcpyToSymbol( A , temMat , sizeof(CSR)) ;
