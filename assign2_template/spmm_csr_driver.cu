@@ -224,6 +224,8 @@ int main(int argc, char *argv[]) {
 
     dev_csr_spmm<<<dimGrid , dimBlock>>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows) ;
 
+    std::cout << "GPU out matrix before kernel\n";
+    print_dmat(dmat_out_GPU,  mat.nrows , K);
     cudaMemcpy(dmat_out_GPU , dmat_out_device ,mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
 
 
