@@ -194,9 +194,9 @@ int main(int argc, char *argv[]) {
     cudaMemcpy(deviceCSRcol_id, mat.col_id , mat.ncols * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
     cudaMemcpy(deviceCSRvalues , mat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice) ;
 
-    cudaMemcpy(device_nrows , mat.nrows , sizeof(unsigned int)) ;
-    cudaMemcpy(device_ncols , mat.ncols , sizeof(unsigned int)) ;
-    cudaMemcpy(device_nnz   , mat.nnz   , sizeof(unsigned int)) ;
+    cudaMemcpy(device_nrows , mat.nrows , sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(device_ncols , mat.ncols , sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(device_nnz   , mat.nnz   , sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
     //cudaMemcpy(temMat->nrows , mat.nrows , 1*sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
     //cudaMemcpy(temMat->ncols , mat.ncols , 1*sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
     //cudaMemcpy(temMat->nnz , mat.nnz , 1*sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
