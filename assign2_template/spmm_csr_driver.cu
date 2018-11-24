@@ -112,9 +112,9 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
         double sum=0.0;
 
         // int row_start = A.row_indx[iy] ;
-         int row_start = deviceCSRrow_indx[iy];
+         int row_start = deviceCSRrow_indx[row];
         // int row_end = A.row_indx[iy + 1] ;
-         int row_end = deviceCSRrow_indx[iy+1] ;
+         int row_end = deviceCSRrow_indx[row+1] ;
 
 
         for (int i = row_start; i < row_end; i++) {
