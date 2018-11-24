@@ -99,15 +99,15 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
    double * dmat_in_device, double* dmat_out_device ,  int K , unsigned int device_nrows ){
 
 
-      int ix= blockIdx.y*blockDim.y + threadIdx.y ;
-      int iy= blockIdx.x*blockDim.x +  threadIdx.x ;
+      int row= blockIdx.y*blockDim.y + threadIdx.y ;
+      int col= blockIdx.x*blockDim.x +  threadIdx.x ;
 
       //int numberOfRowCSR = A.nrows;
       unsigned int numberOfRowCSR = device_nrows ;
       unsigned int colId;
       //const int row = blockIdx.x * blockDim.x + threadIdx.x ;
 
-      if ( iy < numberOfRowCSR && ix < K) {
+      if ( row < numberOfRowCSR && col < K) {
 
         double sum=0.0;
 
@@ -122,11 +122,11 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
           //colId= A.col_id[i] ;
           colId = deviceCSRcol_id[i] ;
           //sum += A.values[i] * dmat_in_device[colId * K + ix] ;
-          sum += deviceCSRvalues[i] * dmat_in_device[colId * K + ix] ;
+          sum += deviceCSRvalues[i] * dmat_in_device[colId * K + col] ;
         }
 
         //dmat_out[ix][iy] = sum ;
-        dmat_out_device[iy * K + ix] = sum ;
+        dmat_out_device[row * K + col] = sum ;
       }
 
 }
@@ -192,7 +192,7 @@ int main(int argc, char *argv[]) {
     //cudaMemcpy(temMat->row_indx , mat.row_indx , mat.nrows * sizeof( int) , cudaMemcpyHostToDevice) ;
     //cudaMemcpy(temMat->col_id , mat.col_id , mat.ncols * sizeof( int) , cudaMemcpyHostToDevice) ;
 
-    cudaMemcpy(deviceCSRrow_indx , mat.row_indx ,  mat.nrows * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(deviceCSRrow_indx , mat.row_indx ,  (mat.nrows+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
     cudaMemcpy(deviceCSRcol_id, mat.col_id , mat.ncols * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
     cudaMemcpy(deviceCSRvalues , mat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice) ;
 
