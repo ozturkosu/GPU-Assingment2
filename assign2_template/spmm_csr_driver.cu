@@ -95,7 +95,7 @@ void host_csr_spmm(CSR &mat, double * dmat_in, double * dmat_out, unsigned int K
 }
 
 //Emin Code start
-__global__ void dev_csr_spmm(const CSR &A , double * dmat_in_device, double* dmat_out_device , unsigned int K){
+__global__ void dev_csr_spmm(const CSR * A , double * dmat_in_device, double* dmat_out_device , unsigned int K){
 
 
       int iy= blockIdx.y*blockDim.y + threadIdx.y ;
@@ -168,7 +168,7 @@ int main(int argc, char *argv[]) {
     //Initialize device addresses since it can not be accessed directly
     cudaMemcpy(temMat->values , mat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice) ;
     cudaMemcpy(temMat->row_indx , mat.row_indx , mat.nrows * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
-    cudaMemcpy(temMat->col_indx , mat.col_id , mat.ncols * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(temMat->col_id , mat.col_id , mat.ncols * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
 
     cudaMemcpy(temMat->nrows , mat.nrows , sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
     cudaMemcpy(temMat->ncols , mat.ncols , sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
