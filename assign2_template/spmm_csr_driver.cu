@@ -150,22 +150,32 @@ int main(int argc, char *argv[]) {
 
 
     //Prepeare for Kernel
-    CSR temMat;
-    temMat.nrows = mat.nrows ;
-    temMat.ncols = mat.ncols ;
-    temMat.nnz = mat.nnz ;
+    CSR *temMat;
+    //temMat->nrows = mat.nrows ;
+    //temMat.->ncols = mat.ncols ;
+    //temMat.->nnz = mat.nnz ;
 
-    cudaMalloc((void**) &temMat.values , mat.nnz * sizeof(double)) ;
-    cudaMalloc((void**) &temMat.row_indx , mat.nrows * sizeof(int)) ;
-    cudaMalloc((void**) &temMat.col_id , mat.ncols * sizeof(int)) ;
+
+
+    cudaMalloc((void**) &(temMat->values) , mat.nnz * sizeof(double)) ;
+    cudaMalloc((void**) &(temMat->row_indx) , mat.nrows * sizeof(int)) ;
+    cudaMalloc((void**) &(temMat->col_id) , mat.ncols * sizeof(int)) ;
+
+    cudaMalloc((void**) &(temMat->nrows) , sizeof(int)) ;
+    cudaMalloc((void**) &(temMat->ncols) , sizeof(int)) ;
+    cudaMalloc((void**) &(temMat->nnz) , sizeof(int)) ;
 
     //Initialize device addresses since it can not be accessed directly
-    cudaMemcpy(temMat->values , mat->values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice) ;
-    cudaMemcpy(temMat->row_indx , mat->row_indx , mat.nrows * sizeof(int) , cudaMemcpyHostToDevice) ;
-    cudaMemcpy(temMat->col_indx , mat->col_id , mat.ncols * sizeof(int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(temMat->values , mat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(temMat->row_indx , mat.row_indx , mat.nrows * sizeof(int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(temMat->col_indx , mat.col_id , mat.ncols * sizeof(int) , cudaMemcpyHostToDevice) ;
 
-    CSR A;
-    cudaMemcpyToSymbol( A , temMat , sizeof(CSR)) ;
+    cudaMemcpy(temMat->nrows , mat.nrows , sizeof(int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(temMat->ncols , mat.ncols , sizeof(int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(temMat->nnz , mat.nnz , sizeof(int) , cudaMemcpyHostToDevice) ;
+
+    //CSR A;
+    //cudaMemcpyToSymbol( A , temMat , sizeof(CSR)) ;
 
     double *dmat_in_device ;
     cudaMalloc((void**) &dmat_in_device , mat.ncols * K * sizeof(double)) ;
@@ -174,8 +184,8 @@ int main(int argc, char *argv[]) {
     cudaMalloc((void**) &dmat_out_device, mat.nrows * K * sizeof(double)) ;
 
     //copt to device
-    cudaMemcpy( dmat_in_device , dmat_in ,mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
-    cudaMemcpy( dmat_out_device, dmat_out,mat.nrows * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
+    cudaMemcpy( dmat_in_device , dmat_in , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
+    cudaMemcpy( dmat_out_device, dmat_out, mat.nrows * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
 
 
     //Initialize the Grid and Block Dimension
