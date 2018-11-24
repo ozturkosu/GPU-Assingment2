@@ -104,7 +104,7 @@ __global__ void dev_csr_spmm( int * deviceCSRrow_indx ,  int * deviceCSRcol_id  
 
       //int numberOfRowCSR = A.nrows;
       int numberOfRowCSR = device_nrows ;
-       colId;
+      int colId;
       //const int row = blockIdx.x * blockDim.x + threadIdx.x ;
 
       if ( iy < numberOfRowCSR && ix < K) {
@@ -173,9 +173,9 @@ int main(int argc, char *argv[]) {
     cudaMalloc((void**) &deviceCSRcol_id , mat.ncols * sizeof(int)) ;
     cudaMalloc((void**) &deviceCSRvalues , mat.nnz * sizeof(double)) ;
 
-    cudaMalloc((void**) &device_nrows, mat.nrows , sizeof(int));
-    cudaMalloc((void**) &device_ncols, mat.ncols , sizeof(int));
-    cudaMalloc((void**) &device_nnz, mat.nnz , sizeof(int));
+    cudaMalloc((void**) &device_nrows, mat.nrows , 1*sizeof(int));
+    cudaMalloc((void**) &device_ncols, mat.ncols , 1*sizeof(int));
+    cudaMalloc((void**) &device_nnz, mat.nnz , 1*sizeof(int));
 
     //cudaMalloc((void**) &(temMat->values) , mat.nnz * sizeof(double)) ;
     //cudaMalloc((void**) &(temMat->row_indx) , mat.nrows * sizeof( int)) ;
