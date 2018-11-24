@@ -103,8 +103,8 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
       int ix= blockIdx.x*blockDim.x+  threadIdx.x ;
 
       //int numberOfRowCSR = A.nrows;
-      int numberOfRowCSR = device_nrows ;
-      int colId;
+      unsigned int numberOfRowCSR = device_nrows ;
+      unsigned int colId;
       //const int row = blockIdx.x * blockDim.x + threadIdx.x ;
 
       if ( iy < numberOfRowCSR && ix < K) {
