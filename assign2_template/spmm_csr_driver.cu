@@ -99,8 +99,8 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
    double * dmat_in_device, double* dmat_out_device ,  int K , unsigned int device_nrows ){
 
 
-      int iy= blockIdx.y*blockDim.y + threadIdx.y ;
-      int ix= blockIdx.x*blockDim.x+  threadIdx.x ;
+      int ix= blockIdx.y*blockDim.y + threadIdx.y ;
+      int iy= blockIdx.x*blockDim.x +  threadIdx.x ;
 
       //int numberOfRowCSR = A.nrows;
       unsigned int numberOfRowCSR = device_nrows ;
