@@ -95,8 +95,8 @@ void host_csr_spmm(CSR &mat, double * dmat_in, double * dmat_out,  int K) {
 }
 
 //Emin Code start
-__global__ void dev_csr_spmm( int * deviceCSRrow_indx ,  int * deviceCSRcol_id  ,  double * deviceCSRvalues,
-   double * dmat_in_device, double* dmat_out_device ,  int K ,  int device_nrows ){
+__global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * deviceCSRcol_id  ,  double * deviceCSRvalues,
+   double * dmat_in_device, double* dmat_out_device ,  int K , unsigned int device_nrows ){
 
 
       int iy= blockIdx.y*blockDim.y + threadIdx.y ;
