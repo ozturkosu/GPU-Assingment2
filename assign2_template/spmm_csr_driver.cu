@@ -11,6 +11,8 @@
 #include "sparse_representation.hpp"
 #include <iostream>
 
+#define TILE_WIDTH 32
+
 void check_dmat(double* a, double *b, unsigned int n, unsigned int K, bool quit_on_err = true ) {
     for (unsigned int i = 0; i < n; ++i) {
         for (unsigned int k = 0; k < K; ++k) {
@@ -89,14 +91,14 @@ void host_csr_spmm(CSR &mat, double * dmat_in, double * dmat_out, unsigned int K
 }
 
 //Emin Code start
-__global__ void dev_csr_spmm(const CSR &A , double * dmat_in, double* dmat_out , unsigned int K){
+__global__ void dev_csr_spmm(const CSR &A , double * dmat_in_device, double* dmat_out_device , unsigned int K){
 
 
       int iy= blockIdx.y*blockDim.y + threadIdx.y ;
       int ix= blockIdx.x*blockDim.x+  threadIdx.x ;
 
       int numberOfRowCSR = A.nrows;
-
+      unsigned colId;
       //const int row = blockIdx.x * blockDim.x + threadIdx.x ;
 
       if ( iy < numberOfRowCSR && ix < K) {
@@ -107,14 +109,14 @@ __global__ void dev_csr_spmm(const CSR &A , double * dmat_in, double* dmat_out ,
         unsigned int row_end = A.row_indx[iy + 1] ;
 
 
-
         for (unsigned i = row_start; i < row_end; i++) {
           /* code */
-          sum += A.values[i] * dmat_in[A.col_id[i]][ix] ;
+          colId= A.col_id[i] ;
+          sum += A.values[i] * dmat_in_device[colId * K + ix] ;
         }
 
-        dmat_out[ix][iy] = sum ;
-
+        //dmat_out[ix][iy] = sum ;
+        dmat_out_device[ix * K + iy] = sum ;
       }
 
 }
@@ -135,6 +137,7 @@ int main(int argc, char *argv[]) {
 
     double *dmat_in = (double*)malloc(mat.ncols * K  * sizeof(double));
     double *dmat_out = (double*)malloc(mat.nrows * K * sizeof(double));
+    double *dmat_out_GPU = (double*)malloc(mat.nrows * K * sizeof(double));
 
     init_dmat(dmat_in, mat.ncols, K,  1.0);
     //print_dmat(dmat_in, mat.ncols, K);
@@ -142,8 +145,46 @@ int main(int argc, char *argv[]) {
     host_csr_spmm(mat, dmat_in, dmat_out, K);
 
 
-    std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
-    check_dmat(dmat_out, dmat_out, mat.nrows, K);
+    //Prepeare for Kernel
+    CSR temMat;
+    temMat.nrows = mat.nrows ;
+    temMat.ncols = mat.ncols ;
+    temMat.nnz = mat.nnz ;
+
+    cudaMalloc((void**) &temMat.values , mat.nnz * sizeof(double)) ;
+    cudaMalloc((void**) &temMat.row_indx , mat.nrows * sizeof(int)) ;
+    cudaMalloc((void**) &temMat.col_indx , mat.ncols * sizeof(int)) ;
+
+    //Initialize device addresses since it can not be accessed directly
+    cudaMemcpy(temMat.values , mat->values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(temMat.row_indx , mat->row_indx , mat.nrows * sizeof(int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(temMat.col_indx , mat->col_indx , mat.ncols * sizeof(int) , cudaMemcpyHostToDevice) ;
+
+    cudaMemcpyToSymbol( A , temMat . sizeof(CSR)) ;
+
+    double *dmat_in_device ;
+    cudaMalloc((void**) &dmat_in_device , mat.ncols * K * sizeof(double)) ;
+
+    double *dmat_out_device ;
+    cudaMalloc((void**) &dmat_out_device, mat.nrows * K * sizeof(double)) ;
+
+    //copt to device
+    cudaMemcpy( dmat_in_device , dmat_in ,mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
+    cudaMemcpy( dmat_out_device, dmat_out,mat.nrows * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
+
+
+    //Initialize the Grid and Block Dimension
+
+    dim3 dimGrid((K-1) / TILE_WIDTH + 1 , (mat.nrows -1)/ TILE_WIDTH +1 , 1  ) ;
+    dim3 dimBlock(TILE_WIDTH , TILE_WIDTH , 1) ;
+
+    dev_csr_spmm<<<dimGrid , dimBlock>>>(A , dmat_in_device , dmat_out_device , K) ;
+
+    cudaMemcpy(dmat_out_GPU , dmat_out_device ,mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
+
+
+    //td::cout << "replace one argument to the below function with the values from gpu " << std::endl;
+    check_dmat(dmat_out, dmat_out_GPU, mat.nrows, K);
 
     //print_dmat(dmat_out, mat.nrows, K);
 

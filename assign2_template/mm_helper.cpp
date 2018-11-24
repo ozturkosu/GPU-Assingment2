@@ -160,4 +160,3 @@ CSC read_matrix_market_to_CSC(const char* fname) {
     return csc_mat;
 
 }
-

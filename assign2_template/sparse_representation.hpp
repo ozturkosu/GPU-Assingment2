@@ -21,6 +21,7 @@ struct CSR
 	unsigned int nnz{};
 };
 
+
 struct CSC
 {
   unsigned int* col_indx{};
@@ -35,7 +36,7 @@ struct CSC
 struct COO
 {
 	unsigned int* row_id{};
-  unsigned int* col_id{}; 	
+  unsigned int* col_id{};
 	double* values{};
 
 	unsigned int nrows{};
