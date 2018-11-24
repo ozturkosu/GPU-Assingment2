@@ -241,8 +241,8 @@ int main(int argc, char *argv[]) {
     cudaFree(deviceCSRcol_id) ;
     cudaFree(deviceCSRvalues) ;
 
-    cudaFree(device_nrows) ;
-    cudaFree(device_ncols) ;
-    cudaFree(device_nnz ) ;
+    //cudaFree(device_nrows) ;
+    //cudaFree(device_ncols) ;
+    //cudaFree(device_nnz ) ;
     return 0;
 }
