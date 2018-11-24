@@ -158,21 +158,21 @@ int main(int argc, char *argv[]) {
 
 
     cudaMalloc((void**) &(temMat->values) , mat.nnz * sizeof(double)) ;
-    cudaMalloc((void**) &(temMat->row_indx) , mat.nrows * sizeof(int)) ;
-    cudaMalloc((void**) &(temMat->col_id) , mat.ncols * sizeof(int)) ;
+    cudaMalloc((void**) &(temMat->row_indx) , mat.nrows * sizeof(unsigned int)) ;
+    cudaMalloc((void**) &(temMat->col_id) , mat.ncols * sizeof(unsigned int)) ;
 
-    cudaMalloc((void**) &(temMat->nrows) , sizeof(int)) ;
-    cudaMalloc((void**) &(temMat->ncols) , sizeof(int)) ;
-    cudaMalloc((void**) &(temMat->nnz) , sizeof(int)) ;
+    cudaMalloc((void**) &(temMat->nrows) , sizeof(unsigned int)) ;
+    cudaMalloc((void**) &(temMat->ncols) , sizeof(unsigned int)) ;
+    cudaMalloc((void**) &(temMat->nnz) , sizeof(unsigned int)) ;
 
     //Initialize device addresses since it can not be accessed directly
     cudaMemcpy(temMat->values , mat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice) ;
-    cudaMemcpy(temMat->row_indx , mat.row_indx , mat.nrows * sizeof(int) , cudaMemcpyHostToDevice) ;
-    cudaMemcpy(temMat->col_indx , mat.col_id , mat.ncols * sizeof(int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(temMat->row_indx , mat.row_indx , mat.nrows * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(temMat->col_indx , mat.col_id , mat.ncols * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
 
-    cudaMemcpy(temMat->nrows , mat.nrows , sizeof(int) , cudaMemcpyHostToDevice) ;
-    cudaMemcpy(temMat->ncols , mat.ncols , sizeof(int) , cudaMemcpyHostToDevice) ;
-    cudaMemcpy(temMat->nnz , mat.nnz , sizeof(int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(temMat->nrows , mat.nrows , sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(temMat->ncols , mat.ncols , sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(temMat->nnz , mat.nnz , sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
 
     //CSR A;
     //cudaMemcpyToSymbol( A , temMat , sizeof(CSR)) ;
