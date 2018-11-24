@@ -122,7 +122,7 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
           //colId= A.col_id[i] ;
           colId = deviceCSRcol_id[i] ;
           //sum += A.values[i] * dmat_in_device[colId * K + ix] ;
-          sum += deviceCSRvalues[i] ;
+          sum += deviceCSRvalues[i] * dmat_in_device[colId * K + ix] ;
         }
 
         //dmat_out[ix][iy] = sum ;
