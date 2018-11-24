@@ -228,9 +228,9 @@ int main(int argc, char *argv[]) {
 
 
     //td::cout << "replace one argument to the below function with the values from gpu " << std::endl;
-    printf("CPU output\n" );
+    std::cout << "CPU\n";
     print_dmat(dmat_out);
-    printf("Cuda output\n" );
+    std::cout << "GPU\n";
     print_dmat(dmat_out_GPU);
     check_dmat(dmat_out, dmat_out_GPU, mat.nrows, K);
 
