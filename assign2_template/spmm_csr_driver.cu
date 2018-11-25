@@ -117,9 +117,10 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
 
             // int row_start = A.row_indx[iy] ;
              unsigned int row_start = deviceCSRrow_indx[row];
+             printf(" row_start = %d thread %d , block %d \n", row_start,  col , row);
             // int row_end = A.row_indx[iy + 1] ;
              unsigned int row_end = deviceCSRrow_indx[row+1] ;
-
+             printf(" row_end = %d thread %d , block %d \n", row_end,  col , row);
 
             for (unsigned int i = row_start; i < row_end; i++) {
                   /* code */
@@ -134,7 +135,7 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
                   //std::cout << 'sum =' <<sum ;
                   //printf(" sum =  %d ,thread %d , block %d", sum, col , row);
             }
-            __synctreads();
+            //__synctreads();
             //dmat_out[ix][iy] = sum ;
             printf(" sum = %d thread %d , block %d \n", sum,  col , row);
             dmat_out_device[row * K + col] = sum ;
