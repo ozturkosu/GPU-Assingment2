@@ -77,7 +77,7 @@ void host_csc_spmm(CSC mat, double * dmat_in, double * dmat_out, unsigned int K)
 
 
 //Emin Code start
-__global__ void dev_csr_spmm(unsigned int * deviceCSRcol_indx , unsigned int * deviceCSRrow_id  ,  double * deviceCSRvalues,
+__global__ void dev_csr_spmm(unsigned int * deviceCSCcol_indx , unsigned int * deviceCSCrow_id  ,  double * deviceCSCvalues,
    double * dmat_in_device, double* dmat_out_device ,  int K , unsigned int device_ncols ){
 
 
