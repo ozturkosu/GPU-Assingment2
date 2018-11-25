@@ -126,6 +126,8 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
           colId = deviceCSRcol_id[i] ;
           double value = deviceCSRvalues[i] ;
           //sum += A.values[i] * dmat_in_device[colId * K + ix] ;
+          printf(" value %d  thread %d , block %d \n",value.  col , row);
+
           sum +=  value * dmat_in_device[colId * K + col] ;
 
           //std::cout << 'sum =' <<sum ;
