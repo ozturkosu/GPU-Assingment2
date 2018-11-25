@@ -89,7 +89,7 @@ void host_csc_spmm(CSC mat, double * dmat_in, double * dmat_out, unsigned int K)
 
 //Emin Code start
 __global__ void dev_csr_spmm(unsigned int * deviceCSCcol_indx , unsigned int * deviceCSCrow_id  ,  double * deviceCSCvalues,
-   double * dmat_in_device, double* dmat_out_device ,  int K , unsigned int device_ncols ){
+   double * dmat_in_device, double* dmat_out_device ,  int K , unsigned int device_ncols , unsigned int device_nrows){
 
 
       //int row= blockIdx.y*blockDim.y + threadIdx.y ;
@@ -101,6 +101,12 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSCcol_indx , unsigned int * d
 
       //const int row = blockIdx.x * blockDim.x + threadIdx.x ;
       //printf(" Rows = %d thread %d , block %d \n", numberOfRowCSR,  col , row);
+
+
+
+      if(row < device_nrows)
+            dmat_out_device[row * K + col] =0;
+
 
       if ( (row < numberOfColCSC) && (col < K) ) {
 
@@ -116,10 +122,6 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSCcol_indx , unsigned int * d
              unsigned int col_end = deviceCSCcol_indx[row+1] ;
              //printf(" row_end = %d thread %d , block %d \n", row_end,  col , row);
 
-             dmat_out_device[row * K + col] =0;
-
-             if(row==4)
-                   dmat_out_device[row * K + col] =0;
 
             for ( int element = col_start; element < col_end; element++) {
                   /* code */
@@ -219,7 +221,7 @@ int main(int argc, char *argv[]) {
 
     cudaEventRecord(startEvent, 0);
 
-    dev_csr_spmm<<<dimGrid , dimBlock>>>(deviceCSCcol_indx, deviceCSCrow_id, deviceCSCvalues , dmat_in_device , dmat_out_device , K , mat.ncols) ;
+    dev_csr_spmm<<<dimGrid , dimBlock>>>(deviceCSCcol_indx, deviceCSCrow_id, deviceCSCvalues , dmat_in_device , dmat_out_device , K , mat.ncols, mat.nrows) ;
 
     cudaEventRecord(stopEvent, 0) ;
     cudaEventSynchronize(stopEvent);
