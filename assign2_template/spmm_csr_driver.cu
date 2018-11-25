@@ -130,16 +130,15 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
 
                   //colId= A.col_id[i] ;
                   colId = deviceCSRcol_id[element] ;
-                  printf(" colId = %d thread %d , block %d \n", colId,  col , row);
+                  //printf(" colId = %d thread %d , block %d \n", colId,  col , row);
 
                   double value = deviceCSRvalues[element] ;
                   double value2 = dmat_in_device[colId * K + col] ;
-                  //sum += A.values[i] * dmat_in_device[colId * K + ix] ;
+
                   //printf(" value %d  thread %d , block %d \n", value,  col , row);
 
                   sum = sum +  value * value2 ;
 
-                  //std::cout << 'sum =' <<sum ;
                   //printf(" sum =  %d ,thread %d , block %d", sum, col , row);
             }
             //__synctreads();
@@ -163,6 +162,22 @@ int main(int argc, char *argv[]) {
      int K = std::atoi(argv[2]);
     CSR mat = read_matrix_market_to_CSR(argv[1]);
     //print_CSR(mat);
+
+
+    //Lets implement pinned memory
+    CSR pinnedMat;
+    cudaHostAlloc(&pinnedMat.row_indx , (mat.nrows +1)* sizeof(unsigned int), cudaHostAllocMapped ) ;
+    cudaHostAlloc(&pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaHostAllocMapped) ;
+    cudaHostAlloc(&pinnedMat.values , mat.nnz * sizeof(double), cudaHostAllocMapped) ;
+
+    memcpy(pinnedMat.row_indx , mat.row_indx ,(mat.nrows +1)* sizeof(unsigned int)) ;
+    memcpy(pinnedMat.col_id , mat.col_id ,mat.nnz * sizeof(unsigned int) ) ;
+    memcpy(pinnedMat.values , mat.values ,mat.nnz * sizeof(double)) ;
+
+    pinnedMat.nrows=mat.nrows ;
+    pinnedMat.ncols=mat.ncols ;
+    pinnedMat.nnz = mat.nnz ;
+
     std::cout << mat.nrows << ' ' << mat.ncols << ' ' << mat.nnz << ' ' << K << '\n';
 
     double *dmat_in = (double*)malloc(mat.ncols * K  * sizeof(double));
@@ -175,56 +190,30 @@ int main(int argc, char *argv[]) {
     host_csr_spmm(mat, dmat_in, dmat_out, K);
 
 
-    //Prepeare for Kernel
-    //CSR *temMat;
-    //temMat->nrows = mat.nrows ;
-    //temMat.->ncols = mat.ncols ;
-    //temMat.->nnz = mat.nnz ;
+
 
     unsigned int* deviceCSRrow_indx;
     unsigned int* deviceCSRcol_id;
     double* deviceCSRvalues;
-
-     //int device_nrows;
-     //int device_ncols;
-     //int device_nnz;
-
 
 
     cudaMalloc((void**) &deviceCSRrow_indx ,(mat.nrows +1) * sizeof(unsigned int)) ;
     cudaMalloc((void**) &deviceCSRcol_id , mat.nnz * sizeof(unsigned int)) ;
     cudaMalloc((void**) &deviceCSRvalues , mat.nnz * sizeof(double)) ;
 
-    //cudaMalloc((void**) &device_nrows,  a*sizeof(int));
-    //cudaMalloc((void**) &device_ncols,  a*sizeof(int));
-    //cudaMalloc((void**) &device_nnz,  a*sizeof(int));
+    //We want to use pinned memory
 
-    //cudaMalloc((void**) &(temMat->values) , mat.nnz * sizeof(double)) ;
-    //cudaMalloc((void**) &(temMat->row_indx) , mat.nrows * sizeof( int)) ;
-    //cudaMalloc((void**) &(temMat->col_id) , mat.ncols * sizeof( int)) ;
+    //cudaMemcpy(deviceCSRrow_indx , mat.row_indx ,  (mat.nrows+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
+    //cudaMemcpy(deviceCSRcol_id, mat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
+    //cudaMemcpy(deviceCSRvalues , mat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice) ;
 
-    //cudaMalloc((void**) &(temMat->nrows) , sizeof( int)) ;
-    //cudaMalloc((void**) &(temMat->ncols) , sizeof( int)) ;
-    //cudaMalloc((void**) &(temMat->nnz) , sizeof( int)) ;
 
-    //Initialize device addresses since it can not be accessed directly
-    //cudaMemcpy(temMat->values , mat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice) ;
-    //cudaMemcpy(temMat->row_indx , mat.row_indx , mat.nrows * sizeof( int) , cudaMemcpyHostToDevice) ;
-    //cudaMemcpy(temMat->col_id , mat.col_id , mat.ncols * sizeof( int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(deviceCSRrow_indx , pinnedMat.row_indx ,(mat.nrows+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(deviceCSRcol_id , pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice ) ;
+    cudaMemcpy(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice)  ;
 
-    cudaMemcpy(deviceCSRrow_indx , mat.row_indx ,  (mat.nrows+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
-    cudaMemcpy(deviceCSRcol_id, mat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
-    cudaMemcpy(deviceCSRvalues , mat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice) ;
 
-    //cudaMemcpy(device_nrows , mat.nrows , a*sizeof(int) , cudaMemcpyHostToDevice) ;
-    //cudaMemcpy(device_ncols , mat.ncols , a*sizeof(int) , cudaMemcpyHostToDevice) ;
-    //cudaMemcpy(device_nnz   , mat.nnz   , sizeof(int) , cudaMemcpyHostToDevice) ;
-    //cudaMemcpy(temMat->nrows , mat.nrows , 1*sizeof( int) , cudaMemcpyHostToDevice) ;
-    //cudaMemcpy(temMat->ncols , mat.ncols , 1*sizeof( int) , cudaMemcpyHostToDevice) ;
-    //cudaMemcpy(temMat->nnz , mat.nnz , 1*sizeof( int) , cudaMemcpyHostToDevice) ;
 
-    //CSR A;
-    //cudaMemcpyToSymbol( A , temMat , sizeof(CSR)) ;
 
     double *dmat_in_device ;
     cudaMalloc((void**) &dmat_in_device , mat.ncols * K * sizeof(double)) ;
@@ -253,10 +242,10 @@ int main(int argc, char *argv[]) {
 
 
     //td::cout << "replace one argument to the below function with the values from gpu " << std::endl;
-    std::cout << "CPU\n";
-    print_dmat(dmat_out, mat.nrows , K);
-    std::cout << "GPU\n";
-    print_dmat(dmat_out_GPU,  mat.nrows , K);
+    //std::cout << "CPU\n";
+    //print_dmat(dmat_out, mat.nrows , K);
+    //std::cout << "GPU\n";
+    //print_dmat(dmat_out_GPU,  mat.nrows , K);
     check_dmat(dmat_out, dmat_out_GPU, mat.nrows, K);
 
     //print_dmat(dmat_out, mat.nrows, K);
@@ -269,6 +258,10 @@ int main(int argc, char *argv[]) {
     cudaFree(deviceCSRrow_indx) ;
     cudaFree(deviceCSRcol_id) ;
     cudaFree(deviceCSRvalues) ;
+
+    cudaHostFree(pinnedMat.row_indx);
+    cudaHostFree(pinnedMat.col_id) ;
+    cudaHostFree(pinnedMat.values) ;
 
     //cudaFree(device_nrows) ;
     //cudaFree(device_ncols) ;
