@@ -75,6 +75,69 @@ void host_csc_spmm(CSC mat, double * dmat_in, double * dmat_out, unsigned int K)
     }
 }
 
+
+//Emin Code start
+__global__ void dev_csr_spmm(unsigned int * deviceCSRcol_indx , unsigned int * deviceCSRrow_id  ,  double * deviceCSRvalues,
+   double * dmat_in_device, double* dmat_out_device ,  int K , unsigned int device_ncols ){
+
+
+      //int row= blockIdx.y*blockDim.y + threadIdx.y ;
+      const int row=blockIdx.y;
+      const int col= blockIdx.x * blockDim.x + threadIdx.x ;
+
+
+      unsigned int numberOfColCSC = device_nrcols ;
+
+      //const int row = blockIdx.x * blockDim.x + threadIdx.x ;
+      //printf(" Rows = %d thread %d , block %d \n", numberOfRowCSR,  col , row);
+
+      if ( (row < numberOfColCSC) && (col < K) ) {
+
+            //printf(" thread %d , block %d \n",  col , row);
+
+            double sum=0;
+            int rowId;
+
+            // int row_start = A.row_indx[iy] ;
+             unsigned int row_start = deviceCSCcol_indx[row];
+             //printf(" row_start = %d thread %d , block %d \n", row_start,  col , row);
+            // int row_end = A.row_indx[iy + 1] ;
+             unsigned int row_end = deviceCSCcol_indx[row+1] ;
+             //printf(" row_end = %d thread %d , block %d \n", row_end,  col , row);
+
+             dmat_out_device[row * K + col] =0;
+
+            for ( int element = row_start; element < row_end; element++) {
+                  /* code */
+
+                  //colId= A.col_id[i] ;
+                  rowId = deviceCSCrow_id[element] ;
+                  //printf(" colId = %d thread %d , block %d \n", colId,  col , row);
+
+                  double value = deviceCSCvalues[element] ;
+                  double value2 = dmat_in_device[row * K + col] ;
+
+                  //printf(" value %d  thread %d , block %d \n", value,  col , row);
+
+                  //sum = sum +  value * value2 ;
+                  dmat_out_device[rowId * K + col] = dmat_out_device[rowId * K + col] + value * value2;
+                  //printf(" sum =  %d ,thread %d , block %d", sum, col , row);
+            }
+            //__synctreads();
+            //dmat_out[ix][iy] = sum ;
+            //printf(" sum = %d thread %d , block %d \n", sum,  col , row);
+
+            //printf("dvice matrix %d\n", dmat_out_device[row * K + col] );
+      }
+
+}
+
+
+
+
+
+
+
 int main(int argc, char *argv[]) {
     if(argc < 3) {
         std::cerr << "usage ./exec inputfile K  " << std::endl;
@@ -85,17 +148,76 @@ int main(int argc, char *argv[]) {
     CSC mat = read_matrix_market_to_CSC(argv[1]);
     std::cout << mat.nrows << ' ' << mat.ncols << ' ' << mat.nnz << ' ' << K << '\n';
 
+    //Cuda Events
+    // events for timing
+    cudaEvent_t startEvent, stopEvent;
+    cudaEventCreate(&startEvent) ;
+    cudaEventCreate(&stopEvent)  ;
+
+
+
+
+
+
     double *dmat_in = (double*)malloc(mat.ncols * K  * sizeof(double));
     double *dmat_out = (double*)malloc(mat.nrows * K * sizeof(double));
+
+    double *dmat_out_GPU = (double*)malloc(mat.nrows * K * sizeof(double));
 
     init_dmat(dmat_in, mat.ncols, K, 1.0);
     //print_dmat(dmat_in, mat.ncols, K);
 
     host_csc_spmm(mat, dmat_in, dmat_out, K);
 
+    unsigned int* deviceCSRrow_indx;
+    unsigned int* deviceCSRcol_id;
+    double* deviceCSRvalues;
+
+
+    cudaMalloc((void**) &deviceCSCcol_indx ,(mat.ncols +1) * sizeof(unsigned int)) ;
+    cudaMalloc((void**) &deviceCSCrow_id , mat.nnz * sizeof(unsigned int)) ;
+    cudaMalloc((void**) &deviceCSCvalues , mat.nnz * sizeof(double)) ;
+
+    cudaMemcpy(deviceCSCcol_indx , mat.col_indx ,  (mat.ncols+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(deviceCSCrow_id, mat.row_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(deviceCSCvalues , mat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice) ;
+
+
+    double *dmat_in_device ;
+    cudaMalloc((void**) &dmat_in_device , mat.ncols * K * sizeof(double)) ;
+
+    double *dmat_out_device ;
+    cudaMalloc((void**) &dmat_out_device, mat.nrows * K * sizeof(double)) ;
+
+    //copy to device
+    cudaMemcpy( dmat_in_device , dmat_in , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
+    cudaMemcpy( dmat_out_device, dmat_out, mat.nrows * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
+
+
+    //Initialize the Grid and Block Dimension
+
+    dim3 dimGrid((K-1) / TILE_WIDTH + 1 , (mat.nrows -1)/1+1 , 1  ) ;
+    dim3 dimBlock(TILE_WIDTH , 1 , 1) ;
+
+    cudaEventRecord(startEvent, 0);
+
+    dev_csr_spmm<<<dimGrid , dimBlock>>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.ncols) ;
+
+    cudaEventRecord(stopEvent, 0) ;
+    cudaEventSynchronize(stopEvent);
+
+    float timeforKernel;
+    cudaEventElapsedTime(&timeforKernel, startEvent, stopEvent) ;
+
+    printf("  Time for Kernel : %f\n",  timeforKernel);
+
+
+    cudaMemcpy(dmat_out_GPU , dmat_out_device ,mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
+
+
 
     std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
-    check_dmat(dmat_out, dmat_out, mat.nrows, K);
+    check_dmat(dmat_out, dmat_out_GPU, mat.nrows, K);
 
     //print_dmat(dmat_out, mat.nrows, K);
 
@@ -103,5 +225,13 @@ int main(int argc, char *argv[]) {
     free(mat.col_indx);
     free(mat.row_id);
     free(mat.values);
+
+    cudaFree(deviceCSCcol_indx) ;
+    cudaFree(deviceCSCrow_id) ;
+    cudaFree(deviceCSCvalues) ;
+
+
+
+
     return 0;
 }

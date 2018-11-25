@@ -27,7 +27,8 @@ NVCCFLAGS=--gpu-architecture=compute_60 --gpu-code=sm_60 -O3
 CC=nvcc
 HCC=gcc
 
-all: $(EXECCSR) 
+#all: $(EXECCSR)
+all: \$$(EXECSR) \$$(EXECSC)\
 	@echo "Change line the above line in Makefile to \"all: \$$(EXECSR) \$$(EXECSC)\" to build both CSR and CSC versions"
 	@echo "Change line the above line in Makefile to \"all: \$$(EXECSR) \$$(EXECSC) \$$(EXEOPT)\" to build both CSR, CSC and OPT versions"
 
@@ -47,7 +48,7 @@ $(EXECOPT): $(OBJSOPT)
 	$(HCC) -O3 -c $< -o $@
 
 clean:
-	rm -f $(EXECCSR) $(OBJSCSR) $(EXECCSC) $(OBJSCSC) $(EXECOPT) $(OBJSOPT) 
+	rm -f $(EXECCSR) $(OBJSCSR) $(EXECCSC) $(OBJSCSC) $(EXECOPT) $(OBJSOPT)
 
 
 # vim:ft=make
