@@ -105,7 +105,7 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
 
 
       unsigned int numberOfRowCSR = device_nrows ;
-      unsigned int colId;
+
       //const int row = blockIdx.x * blockDim.x + threadIdx.x ;
       //printf(" Rows = %d thread %d , block %d \n", numberOfRowCSR,  col , row);
 
@@ -114,6 +114,7 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
             printf(" thread %d , block %d \n",  col , row);
 
             double sum=0.0;
+            unsigned int colId;
 
             // int row_start = A.row_indx[iy] ;
              unsigned int row_start = deviceCSRrow_indx[row];
@@ -122,11 +123,13 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
              unsigned int row_end = deviceCSRrow_indx[row+1] ;
              printf(" row_end = %d thread %d , block %d \n", row_end,  col , row);
 
-            for (unsigned int i = row_start; i < row_end; i++) {
+            for (unsigned int element = row_start; element < row_end; i++) {
                   /* code */
+                  
                   //colId= A.col_id[i] ;
-                  colId = deviceCSRcol_id[i] ;
-                  double value = deviceCSRvalues[i] ;
+                  colId = deviceCSRcol_id[element] ;
+                  printf(" colId = %d thread %d , block %d \n", colId,  col , row);
+                  double value = deviceCSRvalues[element] ;
                   //sum += A.values[i] * dmat_in_device[colId * K + ix] ;
                   //printf(" value %d  thread %d , block %d \n", value,  col , row);
 
