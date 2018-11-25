@@ -101,15 +101,16 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
 
       //int row= blockIdx.y*blockDim.y + threadIdx.y ;
       int row=blockIdx.y;
-      int col= blockIdx.x*blockDim.x +  threadIdx.x ;
+      int col= blockIdx.x * blockDim.x + threadIdx.x ;
 
 
       unsigned int numberOfRowCSR = device_nrows ;
       unsigned int colId;
       //const int row = blockIdx.x * blockDim.x + threadIdx.x ;
 
-      if ( row < numberOfRowCSR && col < K) {
+      if ( (row < numberOfRowCSR) && (col < K) ) {
 
+        printf(" thread %d , block %d",  col , row);
 
         double sum=0.0;
 
@@ -128,7 +129,7 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
           sum +=  value * dmat_in_device[colId * K + col] ;
 
           //std::cout << 'sum =' <<sum ;
-          printf(" sum =  %d ,thread %d , block %d", sum, col , row);
+          //printf(" sum =  %d ,thread %d , block %d", sum, col , row);
         }
 
         //dmat_out[ix][iy] = sum ;
