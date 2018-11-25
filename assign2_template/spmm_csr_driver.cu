@@ -125,7 +125,7 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
 
              dmat_out_device[row * K + col] =0;
 
-            for ( int element = row_start; element < row_end; ++element) {
+            for ( int element = row_start; element < row_end; element++) {
                   /* code */
 
                   //colId= A.col_id[i] ;
