@@ -100,8 +100,8 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
 
 
       //int row= blockIdx.y*blockDim.y + threadIdx.y ;
-      int row=blockIdx.y;
-      int col= blockIdx.x * blockDim.x + threadIdx.x ;
+      const int row=blockIdx.y;
+      const int col= blockIdx.x * blockDim.x + threadIdx.x ;
 
 
       unsigned int numberOfRowCSR = device_nrows ;
@@ -111,33 +111,34 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
 
       if ( (row < numberOfRowCSR) && (col < K) ) {
 
-        printf(" thread %d , block %d \n",  col , row);
+            printf(" thread %d , block %d \n",  col , row);
 
-        double sum=0.0;
+            double sum=0.0;
 
-        // int row_start = A.row_indx[iy] ;
-         unsigned int row_start = deviceCSRrow_indx[row];
-        // int row_end = A.row_indx[iy + 1] ;
-         unsigned int row_end = deviceCSRrow_indx[row+1] ;
+            // int row_start = A.row_indx[iy] ;
+             unsigned int row_start = deviceCSRrow_indx[row];
+            // int row_end = A.row_indx[iy + 1] ;
+             unsigned int row_end = deviceCSRrow_indx[row+1] ;
 
 
-        for (unsigned int i = row_start; i < row_end; i++) {
-          /* code */
-          //colId= A.col_id[i] ;
-          colId = deviceCSRcol_id[i] ;
-          double value = deviceCSRvalues[i] ;
-          //sum += A.values[i] * dmat_in_device[colId * K + ix] ;
-          printf(" value %d  thread %d , block %d \n", value,  col , row);
+            for (unsigned int i = row_start; i < row_end; i++) {
+                  /* code */
+                  //colId= A.col_id[i] ;
+                  colId = deviceCSRcol_id[i] ;
+                  double value = deviceCSRvalues[i] ;
+                  //sum += A.values[i] * dmat_in_device[colId * K + ix] ;
+                  printf(" value %d  thread %d , block %d \n", value,  col , row);
 
-          sum +=  value * dmat_in_device[colId * K + col] ;
+                  sum +=  value * dmat_in_device[colId * K + col] ;
 
-          //std::cout << 'sum =' <<sum ;
-          //printf(" sum =  %d ,thread %d , block %d", sum, col , row);
-        }
+                  //std::cout << 'sum =' <<sum ;
+                  //printf(" sum =  %d ,thread %d , block %d", sum, col , row);
+            }
 
-        //dmat_out[ix][iy] = sum ;
-        printf(" sum = %d thread %d , block %d \n", sum,  col , row);
-        dmat_out_device[row * K + col] = sum ;
+            //dmat_out[ix][iy] = sum ;
+            printf(" sum = %d thread %d , block %d \n", sum,  col , row);
+            dmat_out_device[row * K + col] = sum ;
+            printf("dvice matrix %d\n", dmat_out_device[row * K + col] );
       }
 
 }
