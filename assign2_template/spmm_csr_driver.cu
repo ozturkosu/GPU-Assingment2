@@ -113,7 +113,7 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
 
             printf(" thread %d , block %d \n",  col , row);
 
-            double sum=0.0;
+            double sum=0;
             unsigned int colId;
 
             // int row_start = A.row_indx[iy] ;
@@ -123,26 +123,30 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
              unsigned int row_end = deviceCSRrow_indx[row+1] ;
              printf(" row_end = %d thread %d , block %d \n", row_end,  col , row);
 
+             dmat_out_device[row * K + col] =0;
+
             for (unsigned int element = row_start; element < row_end; element++) {
                   /* code */
 
                   //colId= A.col_id[i] ;
                   colId = deviceCSRcol_id[element] ;
                   printf(" colId = %d thread %d , block %d \n", colId,  col , row);
+
                   double value = deviceCSRvalues[element] ;
+                  double value2 = dmat_in_device[colId * K + col] ;
                   //sum += A.values[i] * dmat_in_device[colId * K + ix] ;
                   //printf(" value %d  thread %d , block %d \n", value,  col , row);
 
-                  sum +=  value * dmat_in_device[colId * K + col] ;
+                  sum = sum +  value * value2 ;
 
                   //std::cout << 'sum =' <<sum ;
                   //printf(" sum =  %d ,thread %d , block %d", sum, col , row);
             }
             //__synctreads();
             //dmat_out[ix][iy] = sum ;
-            printf(" sum = %d thread %d , block %d \n", sum,  col , row);
+            //printf(" sum = %d thread %d , block %d \n", sum,  col , row);
             dmat_out_device[row * K + col] = sum ;
-            printf("dvice matrix %d\n", dmat_out_device[row * K + col] );
+            //printf("dvice matrix %d\n", dmat_out_device[row * K + col] );
       }
 
 }
@@ -185,7 +189,7 @@ int main(int argc, char *argv[]) {
      //int device_ncols;
      //int device_nnz;
 
-     int a=1;
+
 
     cudaMalloc((void**) &deviceCSRrow_indx ,(mat.nrows +1) * sizeof(unsigned int)) ;
     cudaMalloc((void**) &deviceCSRcol_id , mat.ncols * sizeof(unsigned int)) ;
