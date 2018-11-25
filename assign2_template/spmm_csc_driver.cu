@@ -118,6 +118,9 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSCcol_indx , unsigned int * d
 
              dmat_out_device[row * K + col] =0;
 
+             if(row==4)
+                   dmat_out_device[row * K + col] =0;
+
             for ( int element = col_start; element < col_end; element++) {
                   /* code */
 
