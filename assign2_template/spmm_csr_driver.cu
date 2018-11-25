@@ -224,8 +224,8 @@ int main(int argc, char *argv[]) {
 
     //Initialize the Grid and Block Dimension
 
-    dim3 dimGrid((K-1) / TILE_WIDTH + 1 , (mat.nrows -1)/ TILE_WIDTH +1 , 1  ) ;
-    dim3 dimBlock(TILE_WIDTH , TILE_WIDTH , 1) ;
+    dim3 dimGrid((K-1) / TILE_WIDTH + 1 , (mat.nrows -1)/1+1 , 1  ) ;
+    dim3 dimBlock(TILE_WIDTH , 1 , 1) ;
 
     dev_csr_spmm<<<dimGrid , dimBlock>>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows) ;
 
