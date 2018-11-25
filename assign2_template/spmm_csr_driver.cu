@@ -155,7 +155,7 @@ int main(int argc, char *argv[]) {
     double *dmat_out_GPU = (double*)malloc(mat.nrows * K * sizeof(double));
 
     init_dmat(dmat_in, mat.ncols, K,  1.0);
-    //print_dmat(dmat_in, mat.ncols, K);
+    print_dmat(dmat_in, mat.ncols, K);
 
     host_csr_spmm(mat, dmat_in, dmat_out, K);
 
