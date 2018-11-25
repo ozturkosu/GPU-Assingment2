@@ -86,7 +86,7 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSCcol_indx , unsigned int * d
       const int col= blockIdx.x * blockDim.x + threadIdx.x ;
 
 
-      unsigned int numberOfColCSC = device_nrcols ;
+      unsigned int numberOfColCSC = device_ncols ;
 
       //const int row = blockIdx.x * blockDim.x + threadIdx.x ;
       //printf(" Rows = %d thread %d , block %d \n", numberOfRowCSR,  col , row);
