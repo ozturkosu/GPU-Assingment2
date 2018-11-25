@@ -10,6 +10,17 @@
 #include "mm_helper.hpp"
 #include "sparse_representation.hpp"
 #include <iostream>
+#include <cstdlib>
+#include <stdio.h>
+#include <cuda.h>
+#include <stdlib.h>
+
+#define TILE_WIDTH 32
+
+
+
+
+
 
 void check_dmat(double* a, double *b, unsigned int n, unsigned int K, bool quit_on_err = true ) {
     for (unsigned int i = 0; i < n; ++i) {
@@ -169,9 +180,9 @@ int main(int argc, char *argv[]) {
 
     host_csc_spmm(mat, dmat_in, dmat_out, K);
 
-    unsigned int* deviceCSRrow_indx;
-    unsigned int* deviceCSRcol_id;
-    double* deviceCSRvalues;
+    unsigned int* deviceCSCrow_indx;
+    unsigned int* deviceCSCcol_id;
+    double* deviceCSCvalues;
 
 
     cudaMalloc((void**) &deviceCSCcol_indx ,(mat.ncols +1) * sizeof(unsigned int)) ;
