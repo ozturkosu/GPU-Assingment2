@@ -210,7 +210,7 @@ int main(int argc, char *argv[]) {
 
     cudaMemcpy(deviceCSRrow_indx , pinnedMat.row_indx ,(mat.nrows+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
     cudaMemcpy(deviceCSRcol_id , pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice ) ;
-    cudaMemcpy(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice)  ;
+    cudaMemcpy(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice)  ;
 
 
 
