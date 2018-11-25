@@ -247,9 +247,9 @@ int main(int argc, char *argv[]) {
     cudaEventSynchronize(stopEvent);
 
     float timeforKernel;
-    cudaEventElapsedTime(&time, startEvent, stopEvent) ;
+    cudaEventElapsedTime(&timeforKernel, startEvent, stopEvent) ;
 
-    printf("  Time for Kernel : %f\n",  timeforKernel); 
+    printf("  Time for Kernel : %f\n",  timeforKernel);
 
     //cudaDeviceSynchronize() ;
     //std::cout << "GPU out matrix before kernel\n";
