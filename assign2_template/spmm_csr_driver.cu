@@ -110,7 +110,7 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
 
       if ( (row < numberOfRowCSR) && (col < K) ) {
 
-        printf(" thread %d , block %d",  col , row);
+        printf(" thread %d , block %d \n",  col , row);
 
         double sum=0.0;
 
