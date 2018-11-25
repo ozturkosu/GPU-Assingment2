@@ -131,7 +131,11 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSCcol_indx , unsigned int * d
                   //printf(" value %d  thread %d , block %d \n", value,  col , row);
 
                   //sum = sum +  value * value2 ;
-                  dmat_out_device[rowId * K + col] = dmat_out_device[rowId * K + col] + value * value2;
+
+                  //dmat_out_device[rowId * K + col] = dmat_out_device[rowId * K + col] + value * value2;
+
+                  //Lets try atomic operation
+                  atomicAdd(&dmat_out_device[rowId * K + col] ,value * value2 );
                   //printf(" sum =  %d ,thread %d , block %d", sum, col , row);
             }
             //__synctreads();
