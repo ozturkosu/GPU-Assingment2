@@ -127,7 +127,7 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
           //sum += A.values[i] * dmat_in_device[colId * K + ix] ;
           sum +=  value * dmat_in_device[colId * K + col] ;
 
-
+          std::cout << 'sum =' <<sum ;
 
         }
 
