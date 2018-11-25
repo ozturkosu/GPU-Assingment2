@@ -123,9 +123,9 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
              unsigned int row_end = deviceCSRrow_indx[row+1] ;
              printf(" row_end = %d thread %d , block %d \n", row_end,  col , row);
 
-            for (unsigned int element = row_start; element < row_end; i++) {
+            for (unsigned int element = row_start; element < row_end; element++) {
                   /* code */
-                  
+
                   //colId= A.col_id[i] ;
                   colId = deviceCSRcol_id[element] ;
                   printf(" colId = %d thread %d , block %d \n", colId,  col , row);
