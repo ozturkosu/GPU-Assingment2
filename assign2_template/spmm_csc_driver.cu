@@ -180,8 +180,8 @@ int main(int argc, char *argv[]) {
 
     host_csc_spmm(mat, dmat_in, dmat_out, K);
 
-    unsigned int* deviceCSCrow_indx;
-    unsigned int* deviceCSCcol_id;
+    unsigned int* deviceCSCcol_indx;
+    unsigned int* deviceCSCrow_id;
     double* deviceCSCvalues;
 
 
