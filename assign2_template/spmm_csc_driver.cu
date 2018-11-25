@@ -212,7 +212,7 @@ int main(int argc, char *argv[]) {
 
     cudaEventRecord(startEvent, 0);
 
-    dev_csr_spmm<<<dimGrid , dimBlock>>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.ncols) ;
+    dev_csr_spmm<<<dimGrid , dimBlock>>>(deviceCSCcol_indx, deviceCSCrow_id, deviceCSCvalues , dmat_in_device , dmat_out_device , K , mat.ncols) ;
 
     cudaEventRecord(stopEvent, 0) ;
     cudaEventSynchronize(stopEvent);
