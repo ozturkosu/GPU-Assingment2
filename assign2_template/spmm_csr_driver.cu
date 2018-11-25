@@ -100,17 +100,15 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
 
 
       int row= blockIdx.y*blockDim.y + threadIdx.y ;
-      //int col= blockIdx.x*blockDim.x +  threadIdx.x ;
+      int col= blockIdx.x*blockDim.x +  threadIdx.x ;
 
 
-
-      //int numberOfRowCSR = A.nrows;
       unsigned int numberOfRowCSR = device_nrows ;
       unsigned int colId;
       //const int row = blockIdx.x * blockDim.x + threadIdx.x ;
 
-      //if ( row < numberOfRowCSR && col < K) {
-      if ( row < numberOfRowCSR ) {
+      if ( row < numberOfRowCSR && col < K) {
+
 
         double sum=0.0;
 
@@ -126,17 +124,14 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
           colId = deviceCSRcol_id[i] ;
           double value = deviceCSRvalues[i] ;
           //sum += A.values[i] * dmat_in_device[colId * K + ix] ;
-          //sum +=  value * dmat_in_device[colId * K + col] ;
+          sum +=  value * dmat_in_device[colId * K + col] ;
 
-          for ( int k =0 ; k < K ; k++) {
-            /* code */
-            dmat_out_device[row * K + k] += value * dmat_in_device[colId * K +k];
-          }
+
 
         }
 
         //dmat_out[ix][iy] = sum ;
-        //dmat_out_device[row * K + col] = sum ;
+        dmat_out_device[row * K + col] = sum ;
       }
 
 }
