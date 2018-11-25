@@ -110,15 +110,15 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSCcol_indx , unsigned int * d
             int rowId;
 
             // int row_start = A.row_indx[iy] ;
-             unsigned int row_start = deviceCSCcol_indx[row];
+             unsigned int col_start = deviceCSCcol_indx[row];
              //printf(" row_start = %d thread %d , block %d \n", row_start,  col , row);
             // int row_end = A.row_indx[iy + 1] ;
-             unsigned int row_end = deviceCSCcol_indx[row+1] ;
+             unsigned int col_end = deviceCSCcol_indx[row+1] ;
              //printf(" row_end = %d thread %d , block %d \n", row_end,  col , row);
 
-             dmat_out_device[row * K + col] =0;
+             //dmat_out_device[row * K + col] =0;
 
-            for ( int element = row_start; element < row_end; element++) {
+            for ( int element = col_start; element < col_end; element++) {
                   /* code */
 
                   //colId= A.col_id[i] ;
