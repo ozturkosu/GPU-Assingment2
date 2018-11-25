@@ -114,7 +114,7 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
             printf(" thread %d , block %d \n",  col , row);
 
             double sum=0;
-            unsigned int colId;
+            int colId;
 
             // int row_start = A.row_indx[iy] ;
              unsigned int row_start = deviceCSRrow_indx[row];
@@ -125,7 +125,7 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
 
              dmat_out_device[row * K + col] =0;
 
-            for ( int element = row_start; element <= row_end; element++) {
+            for ( int element = row_start; element < row_end; element++) {
                   /* code */
 
                   //colId= A.col_id[i] ;
@@ -192,7 +192,7 @@ int main(int argc, char *argv[]) {
 
 
     cudaMalloc((void**) &deviceCSRrow_indx ,(mat.nrows +1) * sizeof(unsigned int)) ;
-    cudaMalloc((void**) &deviceCSRcol_id , mat.ncols * sizeof(unsigned int)) ;
+    cudaMalloc((void**) &deviceCSRcol_id , mat.nnz * sizeof(unsigned int)) ;
     cudaMalloc((void**) &deviceCSRvalues , mat.nnz * sizeof(double)) ;
 
     //cudaMalloc((void**) &device_nrows,  a*sizeof(int));
@@ -213,7 +213,7 @@ int main(int argc, char *argv[]) {
     //cudaMemcpy(temMat->col_id , mat.col_id , mat.ncols * sizeof( int) , cudaMemcpyHostToDevice) ;
 
     cudaMemcpy(deviceCSRrow_indx , mat.row_indx ,  (mat.nrows+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
-    cudaMemcpy(deviceCSRcol_id, mat.col_id , mat.ncols * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(deviceCSRcol_id, mat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
     cudaMemcpy(deviceCSRvalues , mat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice) ;
 
     //cudaMemcpy(device_nrows , mat.nrows , a*sizeof(int) , cudaMemcpyHostToDevice) ;
