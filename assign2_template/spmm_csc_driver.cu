@@ -116,7 +116,7 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSCcol_indx , unsigned int * d
              unsigned int col_end = deviceCSCcol_indx[row+1] ;
              //printf(" row_end = %d thread %d , block %d \n", row_end,  col , row);
 
-             //dmat_out_device[row * K + col] =0;
+             dmat_out_device[row * K + col] =0;
 
             for ( int element = col_start; element < col_end; element++) {
                   /* code */
