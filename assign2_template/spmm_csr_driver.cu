@@ -83,7 +83,7 @@ void host_csr_spmm(CSR &mat, double * dmat_in, double * dmat_out,  int K) {
         }
 
         for ( int j = row_start; j < row_end; ++j) {
-             int col_id = mat.col_id[j];
+            int col_id = mat.col_id[j];
             double val = mat.values[j];
 
             for ( int k = 0; k < K; ++k) {
@@ -100,7 +100,9 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
 
 
       int row= blockIdx.y*blockDim.y + threadIdx.y ;
-      int col= blockIdx.x*blockDim.x +  threadIdx.x ;
+      //int col= blockIdx.x*blockDim.x +  threadIdx.x ;
+
+
 
       //int numberOfRowCSR = A.nrows;
       unsigned int numberOfRowCSR = device_nrows ;
@@ -121,12 +123,19 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
           /* code */
           //colId= A.col_id[i] ;
           colId = deviceCSRcol_id[i] ;
+          double value = deviceCSRvalues[i] ;
           //sum += A.values[i] * dmat_in_device[colId * K + ix] ;
-          sum += deviceCSRvalues[i] * dmat_in_device[colId * K + col] ;
+          //sum +=  value * dmat_in_device[colId * K + col] ;
+
+          for ( int k =0 ; k < K ; k++) {
+            /* code */
+            dmat_out_device[row * K + k] += value * dmat_in[colId * K +k];
+          }
+
         }
 
         //dmat_out[ix][iy] = sum ;
-        dmat_out_device[row * K + col] = sum ;
+        //dmat_out_device[row * K + col] = sum ;
       }
 
 }
@@ -228,7 +237,7 @@ int main(int argc, char *argv[]) {
     //print_dmat(dmat_out_GPU,  mat.nrows , K);
 
     print_CSR(mat);
-    
+
     cudaMemcpy(dmat_out_GPU , dmat_out_device ,mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
 
 
