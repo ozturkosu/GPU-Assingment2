@@ -28,7 +28,7 @@ CC=nvcc
 HCC=gcc
 
 #all: $(EXECCSR)
-all: $$(EXECSR) $$(EXECSC)
+all: $$(EXECCSR) $$(EXECCSC)
 	@echo "Change line the above line in Makefile to \"all: \$$(EXECSR) \$$(EXECSC)\" to build both CSR and CSC versions"
 	@echo "Change line the above line in Makefile to \"all: \$$(EXECSR) \$$(EXECSC) \$$(EXEOPT)\" to build both CSR, CSC and OPT versions"
 
