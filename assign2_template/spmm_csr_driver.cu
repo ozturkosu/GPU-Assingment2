@@ -111,17 +111,17 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
 
       if ( (row < numberOfRowCSR) && (col < K) ) {
 
-            printf(" thread %d , block %d \n",  col , row);
+            //printf(" thread %d , block %d \n",  col , row);
 
             double sum=0;
             int colId;
 
             // int row_start = A.row_indx[iy] ;
              unsigned int row_start = deviceCSRrow_indx[row];
-             printf(" row_start = %d thread %d , block %d \n", row_start,  col , row);
+             //printf(" row_start = %d thread %d , block %d \n", row_start,  col , row);
             // int row_end = A.row_indx[iy + 1] ;
              unsigned int row_end = deviceCSRrow_indx[row+1] ;
-             printf(" row_end = %d thread %d , block %d \n", row_end,  col , row);
+             //printf(" row_end = %d thread %d , block %d \n", row_end,  col , row);
 
              dmat_out_device[row * K + col] =0;
 
@@ -159,9 +159,19 @@ int main(int argc, char *argv[]) {
         exit(-1);
     }
 
-     int K = std::atoi(argv[2]);
+    int K = std::atoi(argv[2]);
     CSR mat = read_matrix_market_to_CSR(argv[1]);
     //print_CSR(mat);
+
+    //Cuda Events
+    // events for timing
+    cudaEvent_t startEvent, stopEvent;
+    cudaEventCreate(&startEvent) ;
+    cudaEventCreate(&stopEvent)  ;
+
+
+
+
 
 
     //Lets implement pinned memory
@@ -213,8 +223,6 @@ int main(int argc, char *argv[]) {
     cudaMemcpy(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice)  ;
 
 
-
-
     double *dmat_in_device ;
     cudaMalloc((void**) &dmat_in_device , mat.ncols * K * sizeof(double)) ;
 
@@ -231,8 +239,19 @@ int main(int argc, char *argv[]) {
     dim3 dimGrid((K-1) / TILE_WIDTH + 1 , (mat.nrows -1)/1+1 , 1  ) ;
     dim3 dimBlock(TILE_WIDTH , 1 , 1) ;
 
+    cudaEventRecord(startEvent, 0);
+
     dev_csr_spmm<<<dimGrid , dimBlock>>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows) ;
-    cudaDeviceSynchronize() ;
+
+    cudaEventRecord(stopEvent, 0) ;
+    cudaEventSynchronize(stopEvent);
+
+    float timeforKernel;
+    cudaEventElapsedTime(&time, startEvent, stopEvent) ;
+
+    printf("  Time for Kernel : %f\n",  timeforKernel); 
+
+    //cudaDeviceSynchronize() ;
     //std::cout << "GPU out matrix before kernel\n";
     //print_dmat(dmat_out_GPU,  mat.nrows , K);
 
