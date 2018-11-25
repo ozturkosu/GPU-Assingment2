@@ -107,7 +107,7 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
       unsigned int numberOfRowCSR = device_nrows ;
       unsigned int colId;
       //const int row = blockIdx.x * blockDim.x + threadIdx.x ;
-      printf(" Rows = %d thread %d , block %d \n", numberOfRowCSR,  col , row);
+      //printf(" Rows = %d thread %d , block %d \n", numberOfRowCSR,  col , row);
 
       if ( (row < numberOfRowCSR) && (col < K) ) {
 
@@ -234,7 +234,7 @@ int main(int argc, char *argv[]) {
     dim3 dimBlock(TILE_WIDTH , 1 , 1) ;
 
     dev_csr_spmm<<<dimGrid , dimBlock>>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows) ;
-
+    cudaDeviceSynchronize() ;
     //std::cout << "GPU out matrix before kernel\n";
     //print_dmat(dmat_out_GPU,  mat.nrows , K);
 
