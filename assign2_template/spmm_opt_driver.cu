@@ -75,11 +75,85 @@ void host_csr_spmm(CSR &mat, double * dmat_in, double * dmat_out, unsigned int K
     }
 }
 
+//Emin Code start
+__global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * deviceCSRcol_id  ,  double * deviceCSRvalues,
+   double * dmat_in_device, double* dmat_out_device ,  int K , unsigned int device_nrows ){
+
+     __shared__ float vals[] ;
+
+      //int row= blockIdx.y*blockDim.y + threadIdx.y ;
+      const int thread_id_x=blockIdx.x * blockDim.x + threadIdx.x;
+
+      //const int col= blockIdx.x * blockDim.x + threadIdx.x ;
+      const int warp_id = thread_id /32 ;
+
+      const int irow= warp_id / 64 ;
+      const int icol= warp_id % 64 ;
+
+
+      int lane = thread_id & (31) ;
+
+
+      unsigned int numberOfRowCSR = device_nrows ;
+
+      //const int row = blockIdx.x * blockDim.x + threadIdx.x ;
+      //printf(" Rows = %d thread %d , block %d \n", numberOfRowCSR,  col , row);
+
+      if ( (irow < numberOfRowCSR) && icol < K) {
+
+            //printf(" thread %d , block %d \n",  col , row);
+
+
+
+            // int row_start = A.row_indx[iy] ;
+             unsigned int row_start = deviceCSRrow_indx[irow];
+             //printf(" row_start = %d thread %d , block %d \n", row_start,  col , row);
+            // int row_end = A.row_indx[iy + 1] ;
+             unsigned int row_end = deviceCSRrow_indx[irow+1] ;
+             //printf(" row_end = %d thread %d , block %d \n", row_end,  col , row);
+
+             //dmat_out_device[row * K + col] =0;
+
+             vals[threadIdx.x] = 0 ;
+
+            for ( int element = row_start + lane ; element < row_end; element+=32) {
+                  /* code */
+
+                  //colId= A.col_id[i] ;
+                  colId = deviceCSRcol_id[element] ;
+                  //printf(" colId = %d thread %d , block %d \n", colId,  col , row);
+
+                  double value = deviceCSRvalues[element] ;
+                  double value2 = dmat_in_device[colId * K + icol] ;
+
+                  vals[threadIdx.x] += value + value2 ;
+
+                  //printf(" sum =  %d ,thread %d , block %d", sum, col , row);
+            }
+            //Parallel Reduction
+            if(lane < 16) vals[threadIdx.x] += vals[threadIdx.x + 16] ;
+            if(lane < 8 ) vals[threadIdx.x] += vals[threadIdx.x + 8] ;
+            if(lane < 4 ) vals[threadIdx.x] += vals[threadIdx.x + 4] ;
+            if(lane < 2 ) vals[threadIdx.x] += vals[threadIdx.x + 2 ] ;
+            if(lane < 1 ) vals[threadIdx.x] += vals[threadIdx.x + 1 ] ;
+
+            //__synctreads();
+            //dmat_out[ix][iy] = sum ;
+            //printf(" sum = %d thread %d , block %d \n", sum,  col , row);
+            if(lane == 0) ;
+              dmat_out_device[irow * K + icol] = vals[threadIdx.x] ;
+            //printf("dvice matrix %d\n", dmat_out_device[row * K + col] );
+      }
+
+}
+
+
 int main(int argc, char *argv[]) {
     if(argc < 3) {
         std::cerr << "usage ./exec inputfile K  " << std::endl;
         exit(-1);
     }
+    const int TILE_WIDTH=32;
 
     unsigned int K = std::atoi(argv[2]);
     CSR mat = read_matrix_market_to_CSR(argv[1]);
@@ -90,15 +164,93 @@ int main(int argc, char *argv[]) {
 
     init_dmat(dmat_in, mat.ncols, K,  1.0);
 
-    /// No need to optimize host; 
+    /// No need to optimize host;
     host_csr_spmm(mat, dmat_in, dmat_out, K);
 
 
-    std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
-    check_dmat(dmat_out, dmat_out, mat.nrows, K);
+
+    //Lets implement pinned memory
+    CSR pinnedMat;
+    cudaHostAlloc(&pinnedMat.row_indx , (mat.nrows +1)* sizeof(unsigned int), cudaHostAllocMapped ) ;
+    cudaHostAlloc(&pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaHostAllocMapped) ;
+    cudaHostAlloc(&pinnedMat.values , mat.nnz * sizeof(double), cudaHostAllocMapped) ;
+
+    memcpy(pinnedMat.row_indx , mat.row_indx ,(mat.nrows +1)* sizeof(unsigned int)) ;
+    memcpy(pinnedMat.col_id , mat.col_id ,mat.nnz * sizeof(unsigned int) ) ;
+    memcpy(pinnedMat.values , mat.values ,mat.nnz * sizeof(double)) ;
+
+    pinnedMat.nrows=mat.nrows ;
+    pinnedMat.ncols=mat.ncols ;
+    pinnedMat.nnz = mat.nnz ;
+
+    std::cout << mat.nrows << ' ' << mat.ncols << ' ' << mat.nnz << ' ' << K << '\n';
+
+    double *dmat_in = (double*)malloc(mat.ncols * K  * sizeof(double));
+    double *dmat_out = (double*)malloc(mat.nrows * K * sizeof(double));
+    double *dmat_out_GPU = (double*)malloc(mat.nrows * K * sizeof(double));
+
+
+    unsigned int* deviceCSRrow_indx;
+    unsigned int* deviceCSRcol_id;
+    double* deviceCSRvalues;
+
+
+    cudaMalloc((void**) &deviceCSRrow_indx ,(mat.nrows +1) * sizeof(unsigned int)) ;
+    cudaMalloc((void**) &deviceCSRcol_id , mat.nnz * sizeof(unsigned int)) ;
+    cudaMalloc((void**) &deviceCSRvalues , mat.nnz * sizeof(double)) ;
+
+    double *dmat_in_device ;
+    cudaMalloc((void**) &dmat_in_device , mat.ncols * K * sizeof(double)) ;
+
+    double *dmat_out_device ;
+    cudaMalloc((void**) &dmat_out_device, mat.nrows * K * sizeof(double)) ;
+
+
+
+    cudaMemcpy(deviceCSRrow_indx , pinnedMat.row_indx ,(mat.nrows+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(deviceCSRcol_id , pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice ) ;
+    cudaMemcpy(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice)  ;
+
+    //copy to device
+    cudaMemcpy( dmat_in_device , dmat_in , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
+    cudaMemcpy( dmat_out_device, dmat_out, mat.nrows * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
+
+
+    //dim3 dimGrid( ceil(K / TILE_WIDTH) , ceil(mat.nrows/TILE_WIDTH) , 1  ) ;
+    dim3 dimGrid(mat.nrows * K , 1, 1) ;
+    dim3 dimBlock(TILE_WIDTH , 1, 1) ;
+
+    dev_csr_spmm<<<dimGrid , dimBlock ,0 , stream >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows)
+
+    cudaMemcpy(dmat_out_GPU , dmat_out_device ,mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
+
+
+
+    check_dmat(dmat_out, dmat_out_GPU, mat.nrows, K);
+
+    //Lets compute GFLOP
+    unsigned int twoKnnz= 2 * K * mat.nnz ;
+    printf("  2 * K * nnz : %d\n",  twoKnnz);
+
+
+    float GFLOP = (twoKnnz / timeforMemKernel ) ;
+    printf("  GFLOP : %f\n",  GFLOP);
+
+    //print_dmat(dmat_out, mat.nrows, K);
+
 
     free(mat.row_indx);
     free(mat.col_id);
     free(mat.values);
+
+    cudaFree(deviceCSRrow_indx) ;
+    cudaFree(deviceCSRcol_id) ;
+    cudaFree(deviceCSRvalues) ;
+
+    cudaFreeHost(pinnedMat.row_indx);
+    cudaFreeHost(pinnedMat.col_id) ;
+    cudaFreeHost(pinnedMat.values) ;
+
+
     return 0;
 }
