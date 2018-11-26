@@ -84,7 +84,7 @@ void host_csc_spmm(CSC mat, double * dmat_in, double * dmat_out, unsigned int K)
 
 
 //Emin Code start
-__global__ void dev_csr_spmm(unsigned int * deviceCSCcol_indx , unsigned int * deviceCSCrow_id  ,  double * deviceCSCvalues,
+__global__ void dev_csc_spmm(unsigned int * deviceCSCcol_indx , unsigned int * deviceCSCrow_id  ,  double * deviceCSCvalues,
    double * dmat_in_device, double* dmat_out_device ,  int K , unsigned int device_ncols , unsigned int device_nrows){
 
 
@@ -107,8 +107,6 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSCcol_indx , unsigned int * d
 
             //printf(" thread %d , block %d \n",  col , row);
             //__syncthreads();
-
-            
 
             double sum=0;
             int rowId;
@@ -140,6 +138,7 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSCcol_indx , unsigned int * d
                   //Lets try atomic operation
                   atomicAdd(&dmat_out_device[rowId * K + col] ,value * value2 );
                   //printf(" sum =  %d ,thread %d , block %d", sum, col , row);
+                  __synctreads();
             }
             //__synctreads();
             //dmat_out[ix][iy] = sum ;
@@ -222,7 +221,7 @@ int main(int argc, char *argv[]) {
 
     cudaEventRecord(startEvent, 0);
 
-    dev_csr_spmm<<<dimGrid , dimBlock>>>(deviceCSCcol_indx, deviceCSCrow_id, deviceCSCvalues , dmat_in_device , dmat_out_device , K , mat.ncols, mat.nrows) ;
+    dev_csc_spmm<<<dimGrid , dimBlock>>>(deviceCSCcol_indx, deviceCSCrow_id, deviceCSCvalues , dmat_in_device , dmat_out_device , K , mat.ncols, mat.nrows) ;
 
     cudaEventRecord(stopEvent, 0) ;
 
