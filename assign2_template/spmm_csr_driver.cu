@@ -286,7 +286,7 @@ int main(int argc, char *argv[]) {
 
     //Lets compute GFLOP
     int twoKnnz= 2* K * mat.nnz ;
-    printf("  2 * K * nnz : %d\n",  GFLOP);
+    printf("  2 * K * nnz : %d\n",  twoKnnz);
 
 
     double GFLOP = (twoKnnz / timeforMemKernel ) * 10e-6;
