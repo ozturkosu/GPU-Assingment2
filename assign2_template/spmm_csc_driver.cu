@@ -261,8 +261,8 @@ int main(int argc, char *argv[]) {
     cudaFree(deviceCSCrow_id) ;
     cudaFree(deviceCSCvalues) ;
 
-    cudaEventDestroy(start) ;
-    cudaEventDestroy(stop ) ;
+    cudaEventDestroy(startEvent) ;
+    cudaEventDestroy(stopEvent ) ;
 
     cudaEventDestroy(startEventMemKer);
     cudaEventDestroy(stopEventMemKer) ;
