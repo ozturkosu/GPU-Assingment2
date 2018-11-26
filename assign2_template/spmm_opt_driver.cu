@@ -188,8 +188,8 @@ int main(int argc, char *argv[]) {
 
     std::cout << mat.nrows << ' ' << mat.ncols << ' ' << mat.nnz << ' ' << K << '\n';
 
-    double *dmat_in = (double*)malloc(mat.ncols * K  * sizeof(double));
-    double *dmat_out = (double*)malloc(mat.nrows * K * sizeof(double));
+    //double *dmat_in = (double*)malloc(mat.ncols * K  * sizeof(double));
+    //double *dmat_out = (double*)malloc(mat.nrows * K * sizeof(double));
     double *dmat_out_GPU = (double*)malloc(mat.nrows * K * sizeof(double));
 
 
