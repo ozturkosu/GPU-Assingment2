@@ -108,10 +108,8 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSCcol_indx , unsigned int * d
             //printf(" thread %d , block %d \n",  col , row);
 
             for (int r  = 0; r < device_nrows; r++) {
-              /* code */
               dmat_out_device[r *K + col] = 0;
             }
-
 
             double sum=0;
             int rowId;
@@ -218,7 +216,11 @@ int main(int argc, char *argv[]) {
 
     //Initialize the Grid and Block Dimension
 
-    dim3 dimGrid((K-1) / TILE_WIDTH + 1 , (mat.ncols -1)/TILE_WIDTH +1 , 1  ) ;
+    //dim3 dimGrid((K-1) / TILE_WIDTH + 1 , (mat.ncols -1)/TILE_WIDTH +1 , 1  ) ;
+    //
+
+
+
     dim3 dimBlock(TILE_WIDTH , TILE_WIDTH , 1) ;
 
     cudaEventRecord(startEvent, 0);
@@ -249,11 +251,11 @@ int main(int argc, char *argv[]) {
 
     //std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
 
-    //std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
-    //std::cout << "CPU\n";
-    //print_dmat(dmat_out, mat.nrows , K);
-    //std::cout << "GPU\n";
-    //print_dmat(dmat_out_GPU,  mat.nrows , K);
+    std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
+    std::cout << "CPU\n";
+    print_dmat(dmat_out, mat.nrows , K);
+    std::cout << "GPU\n";
+    print_dmat(dmat_out_GPU,  mat.nrows , K);
 
     check_dmat(dmat_out, dmat_out_GPU, mat.nrows, K);
 
