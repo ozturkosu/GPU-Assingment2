@@ -262,7 +262,7 @@ int main(int argc, char *argv[]) {
     printf("  2 * K * nnz : %d\n",  twoKnnz);
 
 
-    double GFLOP = (twoKnnz / timeforMemKernel ) * 10e-6;
+    double GFLOP = (twoKnnz / timeforMemKernel ) ;
     printf("  GFLOP : %d\n",  GFLOP);
 
 
