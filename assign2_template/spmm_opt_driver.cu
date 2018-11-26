@@ -11,6 +11,9 @@
 #include "sparse_representation.hpp"
 #include <iostream>
 
+
+#define TILE_WIDTH 32
+
 void check_dmat(double* a, double *b, unsigned int n, unsigned int K, bool quit_on_err = true ) {
     for (unsigned int i = 0; i < n; ++i) {
         for (unsigned int k = 0; k < K; ++k) {
@@ -79,7 +82,7 @@ void host_csr_spmm(CSR &mat, double * dmat_in, double * dmat_out, unsigned int K
 __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * deviceCSRcol_id  ,  double * deviceCSRvalues,
    double * dmat_in_device, double* dmat_out_device ,  int K , unsigned int device_nrows ){
 
-     __shared__ float vals[] ;
+     __shared__ double vals[TILE_WIDTH] ;
 
       //int row= blockIdx.y*blockDim.y + threadIdx.y ;
       const int thread_id_x=blockIdx.x * blockDim.x + threadIdx.x;
@@ -103,7 +106,7 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
 
             //printf(" thread %d , block %d \n",  col , row);
 
-
+            int colId;
 
             // int row_start = A.row_indx[iy] ;
              unsigned int row_start = deviceCSRrow_indx[irow];
@@ -153,7 +156,7 @@ int main(int argc, char *argv[]) {
         std::cerr << "usage ./exec inputfile K  " << std::endl;
         exit(-1);
     }
-    const int TILE_WIDTH=32;
+    //const int TILE_WIDTH=32;
 
     unsigned int K = std::atoi(argv[2]);
     CSR mat = read_matrix_market_to_CSR(argv[1]);
@@ -220,7 +223,7 @@ int main(int argc, char *argv[]) {
     dim3 dimGrid(mat.nrows * K , 1, 1) ;
     dim3 dimBlock(TILE_WIDTH , 1, 1) ;
 
-    dev_csr_spmm<<<dimGrid , dimBlock ,0 , stream >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows)
+    dev_csr_spmm<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows);
 
     cudaMemcpy(dmat_out_GPU , dmat_out_device ,mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
 
@@ -233,8 +236,8 @@ int main(int argc, char *argv[]) {
     printf("  2 * K * nnz : %d\n",  twoKnnz);
 
 
-    float GFLOP = (twoKnnz / timeforMemKernel ) ;
-    printf("  GFLOP : %f\n",  GFLOP);
+    //float GFLOP = (twoKnnz / timeforMemKernel ) ;
+  //  printf("  GFLOP : %f\n",  GFLOP);
 
     //print_dmat(dmat_out, mat.nrows, K);
 
