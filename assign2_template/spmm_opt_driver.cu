@@ -104,7 +104,7 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
 
       if ( (irow < numberOfRowCSR) && icol < K) {
 
-            //printf(" thread %d , block %d \n",  col , row);
+            printf(" icol %d , irow %d \n",  icol , irow);
 
             int colId;
 
@@ -258,7 +258,7 @@ int main(int argc, char *argv[]) {
     cudaFree(deviceCSRcol_id) ;
     cudaFree(deviceCSRvalues) ;
 
-  
+
 
 
     return 0;
