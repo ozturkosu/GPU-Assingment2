@@ -122,7 +122,7 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSCcol_indx , unsigned int * d
 
                   //colId= A.col_id[i] ;
                   rowId = deviceCSCrow_id[element] ;
-                  printf(" rolId = %d thread %d , block %d \n", rowId,  col , row);
+                  //printf(" rolId = %d thread %d , block %d \n", rowId,  col , row);
 
                   double value = deviceCSCvalues[element] ;
                   double value2 = dmat_in_device[row * K + col] ;
