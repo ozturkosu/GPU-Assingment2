@@ -15,7 +15,7 @@
 #include <cuda.h>
 #include <stdlib.h>
 
-#define TILE_WIDTH 256
+//#define TILE_WIDTH 256
 
 
 void check_dmat(double* a, double *b, unsigned int n, unsigned int K, bool quit_on_err = true ) {
@@ -156,6 +156,7 @@ int main(int argc, char *argv[]) {
         exit(-1);
     }
 
+
     unsigned int K = std::atoi(argv[2]);
     CSC mat = read_matrix_market_to_CSC(argv[1]);
     std::cout << mat.nrows << ' ' << mat.ncols << ' ' << mat.nnz << ' ' << K << '\n';
@@ -166,6 +167,7 @@ int main(int argc, char *argv[]) {
     cudaEventCreate(&startEvent) ;
     cudaEventCreate(&stopEvent)  ;
 
+    int TILE_WIDTH = K+1;
 
     cudaEvent_t startEventMemKer , stopEventMemKer ;
     cudaEventCreate(&startEventMemKer);
