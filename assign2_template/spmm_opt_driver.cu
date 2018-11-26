@@ -94,7 +94,7 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
       const int icol= warp_id % 64 ;
 
 
-      int lane = thread_id & (31) ;
+      int lane = thread_id_x & (31) ;
 
 
       unsigned int numberOfRowCSR = device_nrows ;
@@ -223,7 +223,7 @@ int main(int argc, char *argv[]) {
     dim3 dimGrid(mat.nrows * K , 1, 1) ;
     dim3 dimBlock(TILE_WIDTH , 1, 1) ;
 
-    dev_csr_spmm<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows);
+    dev_opt_spmm<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows);
 
     cudaMemcpy(dmat_out_GPU , dmat_out_device ,mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
 
