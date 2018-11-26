@@ -89,7 +89,7 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSCcol_indx , unsigned int * d
 
 
       //int row= blockIdx.y*blockDim.y + threadIdx.y ;
-      const int row=blockIdx.y;
+      const int row=blockIdx.y * blockDim.y + threadIdx.y;
       const int col= blockIdx.x * blockDim.x + threadIdx.x ;
 
 
@@ -98,7 +98,7 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSCcol_indx , unsigned int * d
       //const int row = blockIdx.x * blockDim.x + threadIdx.x ;
       //printf(" Rows = %d thread %d , block %d \n", numberOfRowCSR,  col , row);
 
-      if(row < device_nrows)
+      if(row < device_nrows && col < K)
             dmat_out_device[row * K + col] =0;
 
 
@@ -211,8 +211,8 @@ int main(int argc, char *argv[]) {
 
     //Initialize the Grid and Block Dimension
 
-    dim3 dimGrid((K-1) / TILE_WIDTH + 1 , (mat.nrows -1)/1+1 , 1  ) ;
-    dim3 dimBlock(TILE_WIDTH , 1 , 1) ;
+    dim3 dimGrid((K-1) / TILE_WIDTH + 1 , (mat.nrows -1)/TILE_WIDTH +1 , 1  ) ;
+    dim3 dimBlock(TILE_WIDTH , TILE_WIDTH , 1) ;
 
     cudaEventRecord(startEvent, 0);
 
