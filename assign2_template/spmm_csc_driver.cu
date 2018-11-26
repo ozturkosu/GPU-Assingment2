@@ -101,15 +101,17 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSCcol_indx , unsigned int * d
       //if(row < device_nrows && col < K)
       //      dmat_out_device[row * K + col] =0;
 
-      for (int r  = 0; r < device_nrows; r++) {
-        /* code */
-        dmat_out_device[r *K + col] = 0;
-      }
 
 
       if ( (row < numberOfColCSC) && (col < K) ) {
 
             //printf(" thread %d , block %d \n",  col , row);
+
+            for (int r  = 0; r < device_nrows; r++) {
+              /* code */
+              dmat_out_device[r *K + col] = 0;
+            }
+
 
             double sum=0;
             int rowId;
