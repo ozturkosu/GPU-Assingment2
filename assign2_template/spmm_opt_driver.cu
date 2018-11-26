@@ -258,9 +258,7 @@ int main(int argc, char *argv[]) {
     cudaFree(deviceCSRcol_id) ;
     cudaFree(deviceCSRvalues) ;
 
-    cudaFreeHost(pinnedMat.row_indx);
-    cudaFreeHost(pinnedMat.col_id) ;
-    cudaFreeHost(pinnedMat.values) ;
+  
 
 
     return 0;
