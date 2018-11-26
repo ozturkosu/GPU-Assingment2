@@ -98,8 +98,13 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSCcol_indx , unsigned int * d
       //const int row = blockIdx.x * blockDim.x + threadIdx.x ;
       //printf(" Rows = %d thread %d , block %d \n", numberOfRowCSR,  col , row);
 
-      if(row < device_nrows && col < K)
-            dmat_out_device[row * K + col] =0;
+      //if(row < device_nrows && col < K)
+      //      dmat_out_device[row * K + col] =0;
+
+      for (int r  = 0; r < device_nrows; r++) {
+        /* code */
+        dmat_out_device[r *K + col] = 0;
+      }
 
 
       if ( (row < numberOfColCSC) && (col < K) ) {
