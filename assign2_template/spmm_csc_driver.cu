@@ -216,10 +216,8 @@ int main(int argc, char *argv[]) {
 
     //Initialize the Grid and Block Dimension
 
-    //dim3 dimGrid((K-1) / TILE_WIDTH + 1 , (mat.ncols -1)/TILE_WIDTH +1 , 1  ) ;
+    dim3 dimGrid((K-1) / TILE_WIDTH + 1 , (mat.ncols -1)/TILE_WIDTH +1 , 1  ) ;
     //
-
-
 
     dim3 dimBlock(TILE_WIDTH , TILE_WIDTH , 1) ;
 
