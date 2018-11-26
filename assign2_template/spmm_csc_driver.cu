@@ -15,7 +15,7 @@
 #include <cuda.h>
 #include <stdlib.h>
 
-#define TILE_WIDTH 32
+#define TILE_WIDTH 256
 
 
 void check_dmat(double* a, double *b, unsigned int n, unsigned int K, bool quit_on_err = true ) {
