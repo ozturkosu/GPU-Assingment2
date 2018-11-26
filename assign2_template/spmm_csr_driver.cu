@@ -285,7 +285,7 @@ int main(int argc, char *argv[]) {
     check_dmat(dmat_out, dmat_out_GPU, mat.nrows, K);
 
     //Lets compute GFLOP
-    int twoKnnz= 2* K * mat.nnz ;
+    double twoKnnz= 2* K * mat.nnz ;
     printf("  2 * K * nnz : %d\n",  twoKnnz);
 
 
