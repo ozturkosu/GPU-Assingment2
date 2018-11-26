@@ -15,7 +15,7 @@
 #include <cuda.h>
 #include <stdlib.h>
 
-#define TILE_WIDTH 32
+//#define TILE_WIDTH 32
 
 void check_dmat(double* a, double *b,  int n,  int K, bool quit_on_err = true ) {
     for ( int i = 0; i < n; ++i) {
@@ -163,6 +163,8 @@ int main(int argc, char *argv[]) {
     CSR mat = read_matrix_market_to_CSR(argv[1]);
     //print_CSR(mat);
 
+    int TILE_WIDTH = K +1 ;
+
     //Cuda Events
     // events for timing
     cudaEvent_t startEvent, stopEvent;
@@ -170,6 +172,9 @@ int main(int argc, char *argv[]) {
     cudaEventCreate(&stopEvent)  ;
 
 
+    cudaEvent_t startEventMemKer , stopEventMemKer ;
+    cudaEventCreate(&startEventMemKer);
+    cudaEventCreate(&stopEventMemKer) ;
 
 
 
@@ -211,23 +216,26 @@ int main(int argc, char *argv[]) {
     cudaMalloc((void**) &deviceCSRcol_id , mat.nnz * sizeof(unsigned int)) ;
     cudaMalloc((void**) &deviceCSRvalues , mat.nnz * sizeof(double)) ;
 
+    double *dmat_in_device ;
+    cudaMalloc((void**) &dmat_in_device , mat.ncols * K * sizeof(double)) ;
+
+    double *dmat_out_device ;
+    cudaMalloc((void**) &dmat_out_device, mat.nrows * K * sizeof(double)) ;
+
     //We want to use pinned memory
 
     //cudaMemcpy(deviceCSRrow_indx , mat.row_indx ,  (mat.nrows+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
     //cudaMemcpy(deviceCSRcol_id, mat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
     //cudaMemcpy(deviceCSRvalues , mat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice) ;
 
+    cudaEventRecord(startEventMemKer, 0);
 
     cudaMemcpy(deviceCSRrow_indx , pinnedMat.row_indx ,(mat.nrows+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
     cudaMemcpy(deviceCSRcol_id , pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice ) ;
     cudaMemcpy(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice)  ;
 
 
-    double *dmat_in_device ;
-    cudaMalloc((void**) &dmat_in_device , mat.ncols * K * sizeof(double)) ;
 
-    double *dmat_out_device ;
-    cudaMalloc((void**) &dmat_out_device, mat.nrows * K * sizeof(double)) ;
 
     //copy to device
     cudaMemcpy( dmat_in_device , dmat_in , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
@@ -259,6 +267,15 @@ int main(int argc, char *argv[]) {
 
     cudaMemcpy(dmat_out_GPU , dmat_out_device ,mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
 
+
+    cudaEventRecord(stopEventMemKer, 0) ;
+
+    cudaEventSynchronize(startEventMemKer);
+    cudaEventSynchronize(stopEventMemKer);
+
+    float timeforMemKernel;
+    cudaEventElapsedTime(&timeforMemKernel, startEventMemKer, stopEventMemKer) ;
+    printf("  Time for Mem Cpy and Kernel : %f\n",  timeforMemKernel);
 
     //std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
     //std::cout << "CPU\n";
