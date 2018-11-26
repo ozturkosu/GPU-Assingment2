@@ -171,7 +171,7 @@ int main(int argc, char *argv[]) {
     host_csr_spmm(mat, dmat_in, dmat_out, K);
 
 
-
+    /*
     //Lets implement pinned memory
     CSR pinnedMat;
     cudaHostAlloc(&pinnedMat.row_indx , (mat.nrows +1)* sizeof(unsigned int), cudaHostAllocMapped ) ;
@@ -185,6 +185,10 @@ int main(int argc, char *argv[]) {
     pinnedMat.nrows=mat.nrows ;
     pinnedMat.ncols=mat.ncols ;
     pinnedMat.nnz = mat.nnz ;
+
+    */
+
+
 
     std::cout << mat.nrows << ' ' << mat.ncols << ' ' << mat.nnz << ' ' << K << '\n';
 
@@ -210,9 +214,9 @@ int main(int argc, char *argv[]) {
 
 
 
-    cudaMemcpy(deviceCSRrow_indx , pinnedMat.row_indx ,(mat.nrows+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
-    cudaMemcpy(deviceCSRcol_id , pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice ) ;
-    cudaMemcpy(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice)  ;
+    cudaMemcpy(deviceCSRrow_indx , mat.row_indx ,(mat.nrows+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
+    cudaMemcpy(deviceCSRcol_id , mat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice ) ;
+    cudaMemcpy(deviceCSRvalues , mat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice)  ;
 
     //copy to device
     cudaMemcpy( dmat_in_device , dmat_in , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
