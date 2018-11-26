@@ -244,8 +244,8 @@ int main(int argc, char *argv[]) {
 
     //Initialize the Grid and Block Dimension
 
-    dim3 dimGrid((K-1) / TILE_WIDTH + 1 , (mat.nrows -1)/1+1 , 1  ) ;
-    dim3 dimBlock(TILE_WIDTH , 1 , 1) ;
+    dim3 dimGrid( ceil(K / TILE_WIDTH) , ceil(mat.nrows/TILE_WIDTH) , 1  ) ;
+    dim3 dimBlock(TILE_WIDTH , TILE_WIDTH , 1) ;
 
     cudaEventRecord(startEvent, 0);
 
