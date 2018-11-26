@@ -110,6 +110,7 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSCcol_indx , unsigned int * d
             for (int r  = 0; r < device_nrows; r++) {
               dmat_out_device[r *K + col] = 0;
             }
+             __syncthreads();
 
             double sum=0;
             int rowId;
