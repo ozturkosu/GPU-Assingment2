@@ -107,15 +107,8 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSCcol_indx , unsigned int * d
 
             //printf(" thread %d , block %d \n",  col , row);
             //__syncthreads();
-            if(row == 1 && col ==1){
-              for (int r  = 0; r < device_nrows; r++) {
-                 for (int k = 0; k < device_ncols; k++) {
-                    dmat_out_device[r *K + k] = 0;
-                 }
 
-              }
-            }
-             __syncthreads();
+            
 
             double sum=0;
             int rowId;
