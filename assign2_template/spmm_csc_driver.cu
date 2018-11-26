@@ -258,12 +258,12 @@ int main(int argc, char *argv[]) {
     check_dmat(dmat_out, dmat_out_GPU, mat.nrows, K);
 
     //Lets compute GFLOP
-    int twoKnnz= 2* K * mat.nnz ;
+    unsigned int twoKnnz= 2 * K * mat.nnz ;
     printf("  2 * K * nnz : %d\n",  twoKnnz);
 
 
-    double GFLOP = (twoKnnz / timeforMemKernel ) ;
-    printf("  GFLOP : %d\n",  GFLOP);
+    float GFLOP = (twoKnnz / timeforMemKernel ) ;
+    printf("  GFLOP : %f\n",  GFLOP);
 
 
     //print_dmat(dmat_out, mat.nrows, K);
