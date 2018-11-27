@@ -153,7 +153,7 @@ __global__ void dev_opt_spmm_2(unsigned int * deviceCSRrow_indx , unsigned int *
                 //printf(" sum = %d thread %d , block %d \n", sum,  col , row);
 
                 if(lane == 0)
-                  atomicAdd(dmat_out_device[irow * K + icol] , vals[threadIdx.x]) ;
+                  atomicAdd(&dmat_out_device[irow * K + icol] , vals[threadIdx.x]) ;
                 //printf("dvice matrix %d\n", dmat_out_device[row * K + col] );
           }
       }
