@@ -15,7 +15,7 @@
 #include <cuda.h>
 #include <stdlib.h>
 
-//#define TILE_WIDTH 256
+#define TILE_WIDTH 32
 
 
 void check_dmat(double* a, double *b, unsigned int n, unsigned int K, bool quit_on_err = true ) {
@@ -167,7 +167,7 @@ int main(int argc, char *argv[]) {
     cudaEventCreate(&startEvent) ;
     cudaEventCreate(&stopEvent)  ;
 
-    int TILE_WIDTH = K+1;
+    //int TILE_WIDTH = K+1;
 
     cudaEvent_t startEventMemKer , stopEventMemKer ;
     cudaEventCreate(&startEventMemKer);
