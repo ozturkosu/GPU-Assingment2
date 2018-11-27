@@ -317,7 +317,7 @@ int main(int argc, char *argv[]) {
     dim3 dimGrid(mat.nrows * K +1 , 1, 1) ;
     dim3 dimBlock(TILE_WIDTH , 1, 1) ;
 
-    dev_opt_spmm2<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows);
+    dev_opt_spmm_2<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows);
 
     cudaMemcpy(dmat_out_GPU , dmat_out_device , mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
 
