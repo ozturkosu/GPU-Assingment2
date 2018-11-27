@@ -100,14 +100,14 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
 
 
       //int row= blockIdx.y*blockDim.y + threadIdx.y ;
-      const int row=blockIdx.y;
+      const int row=blockIdx.y * blockDim.y + threadIdx.y ;
       const int col= blockIdx.x * blockDim.x + threadIdx.x ;
 
 
       unsigned int numberOfRowCSR = device_nrows ;
 
       //const int row = blockIdx.x * blockDim.x + threadIdx.x ;
-      //printf(" Rows = %d thread %d , block %d \n", numberOfRowCSR,  col , row);
+      printf(" Rows = %d col %d , row %d \n", numberOfRowCSR,  col , row);
 
       if ( (row < numberOfRowCSR) && (col < K) ) {
 
