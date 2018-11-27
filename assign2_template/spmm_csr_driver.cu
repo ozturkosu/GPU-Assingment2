@@ -107,7 +107,7 @@ __global__ void dev_csr_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
       unsigned int numberOfRowCSR = device_nrows ;
 
       //const int row = blockIdx.x * blockDim.x + threadIdx.x ;
-      printf(" Rows = %d col %d , row %d \n", numberOfRowCSR,  col , row);
+      //printf(" Rows = %d col %d , row %d \n", numberOfRowCSR,  col , row);
 
       if ( (row < numberOfRowCSR) && (col < K) ) {
 
@@ -245,8 +245,6 @@ int main(int argc, char *argv[]) {
     cudaMemcpy(deviceCSRcol_id , pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice );
     cudaMemcpy(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice )  ;
     cudaMemcpy( dmat_in_device , dmat_in , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
-    //cudaMemcpy( dmat_out_device, dmat_out, mat.nrows * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
-
 
 
     //Initialize the Grid and Block Dimension
@@ -284,11 +282,11 @@ int main(int argc, char *argv[]) {
     cudaEventElapsedTime(&timeforMemKernel, startEventMemKer, stopEventMemKer) ;
     printf("  Time for Mem Cpy and Kernel : %f\n",  timeforMemKernel);
 
-    std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
-    std::cout << "CPU\n";
-    print_dmat(dmat_out, mat.nrows , K);
-    std::cout << "GPU\n";
-    print_dmat(dmat_out_GPU,  mat.nrows , K);
+    //std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
+    //std::cout << "CPU\n";
+    //print_dmat(dmat_out, mat.nrows , K);
+    //std::cout << "GPU\n";
+    //print_dmat(dmat_out_GPU,  mat.nrows , K);
     check_dmat(dmat_out, dmat_out_GPU, mat.nrows, K);
 
     //Lets compute GFLOP
