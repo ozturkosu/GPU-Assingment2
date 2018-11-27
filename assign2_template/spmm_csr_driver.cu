@@ -231,7 +231,7 @@ int main(int argc, char *argv[]) {
     cudaEventRecord(startEventMemKer, 0);
 
 
-    cudaStream_t stream;
+    //cudaStream_t stream;
 
     //cudaMemcpy(deviceCSRrow_indx , pinnedMat.row_indx ,(mat.nrows+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
     //cudaMemcpy(deviceCSRcol_id , pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice ) ;
@@ -241,11 +241,11 @@ int main(int argc, char *argv[]) {
     //cudaMemcpy( dmat_in_device , dmat_in , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
     //cudaMemcpy( dmat_out_device, dmat_out, mat.nrows * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
 
-    cudaMemcpyAsync(deviceCSRrow_indx , pinnedMat.row_indx ,(mat.nrows+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice ,stream);
-    cudaMemcpyAsync(deviceCSRcol_id , pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice , stream);
-    cudaMemcpyAsync(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice ,stream)  ;
-    cudaMemcpyAsync( dmat_in_device , dmat_in , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice ,stream) ;
-    cudaMemcpyAsync( dmat_out_device, dmat_out, mat.nrows * K * sizeof(double) , cudaMemcpyHostToDevice ,stream) ;
+    cudaMemcpy(deviceCSRrow_indx , pinnedMat.row_indx ,(mat.nrows+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice );
+    cudaMemcpy(deviceCSRcol_id , pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice );
+    cudaMemcpy(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice )  ;
+    cudaMemcpy( dmat_in_device , dmat_in , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
+    cudaMemcpy( dmat_out_device, dmat_out, mat.nrows * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
 
 
 
@@ -288,7 +288,7 @@ int main(int argc, char *argv[]) {
     //std::cout << "CPU\n";
     //print_dmat(dmat_out, mat.nrows , K);
     //std::cout << "GPU\n";
-    //print_dmat(dmat_out_GPU,  mat.nrows , K);
+    print_dmat(dmat_out_GPU,  mat.nrows , K);
     check_dmat(dmat_out, dmat_out_GPU, mat.nrows, K);
 
     //Lets compute GFLOP
@@ -297,7 +297,7 @@ int main(int argc, char *argv[]) {
 
 
     float GFLOP = (twoKnnz / timeforMemKernel ) ;
-    printf("  GFLOP : %f\n",  GFLOP);
+    printf("  GFLOP : %d\n",  GFLOP);
 
     //print_dmat(dmat_out, mat.nrows, K);
 
