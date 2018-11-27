@@ -145,9 +145,9 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
             //if(lane < 2 ) vals[threadIdx.x] += vals[threadIdx.x + 2 ] ;
             //if(lane < 1 ) vals[threadIdx.x] += vals[threadIdx.x + 1 ] ;
 
-            //for (int d = 32 >> 1; d >= 1; d >>=1 ) {
-            //  if(lane < d) vals[threadIdx.x] += vals[threadIdx.x + d] ;
-            //}
+            for (int d = 32 >> 1; d >= 1; d >>=1 ) {
+              if(lane < d) vals[threadIdx.x] += vals[threadIdx.x + d] ;
+            }
 
 
             //__synctreads();
@@ -234,7 +234,7 @@ int main(int argc, char *argv[]) {
 
 
     //dim3 dimGrid( ceil(K / TILE_WIDTH) , ceil(mat.nrows/TILE_WIDTH) , 1  ) ;
-    dim3 dimGrid(mat.nrows * K +1, 1, 1) ;
+    dim3 dimGrid((mat.nrows * K -1 ) / TILE_WIDTH +1 , 1, 1) ;
     dim3 dimBlock(TILE_WIDTH , 1, 1) ;
 
     dev_opt_spmm<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows);
