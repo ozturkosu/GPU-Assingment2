@@ -297,7 +297,7 @@ int main(int argc, char *argv[]) {
 
 
     float GFLOP = (twoKnnz / timeforMemKernel ) ;
-    printf("  GFLOP : %d\n",  GFLOP);
+    printf("  GFLOP : %f\n",  GFLOP);
 
     //print_dmat(dmat_out, mat.nrows, K);
 
