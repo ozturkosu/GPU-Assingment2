@@ -230,7 +230,7 @@ int main(int argc, char *argv[]) {
 
 
     //dim3 dimGrid( ceil(K / TILE_WIDTH) , ceil(mat.nrows/TILE_WIDTH) , 1  ) ;
-    dim3 dimGrid(mat.nrows * K , 1, 1) ;
+    dim3 dimGrid((mat.nrows * K-1) /TILE_WIDTH +1, 1, 1) ;
     dim3 dimBlock(TILE_WIDTH , 1, 1) ;
 
     dev_opt_spmm<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows);
