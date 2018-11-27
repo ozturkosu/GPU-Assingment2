@@ -172,7 +172,7 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
       const int thread_id_y=blockIdx.y * blockDim.y + threadIdx.y;
 
       //const int col= blockIdx.x * blockDim.x + threadIdx.x ;
-      //const int warp_id = thread_id_x /32 ;
+      const int warp_id = thread_id_x /32 ;
 
       const int irow= warp_id / K ;
       const int icol= warp_id & (K-1) ;
