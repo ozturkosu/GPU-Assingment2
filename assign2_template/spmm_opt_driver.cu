@@ -129,6 +129,8 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
                   double value = deviceCSRvalues[element] ;
                   double value2 = dmat_in_device[colId * K + icol] ;
 
+                printf(" colId = %d thread %d , block %d \n", colId,  threadIdx.x , row);
+
                   vals[threadIdx.x] += value + value2 ;
 
                   //printf(" sum =  %d ,thread %d , block %d", sum, col , row);
@@ -235,9 +237,9 @@ int main(int argc, char *argv[]) {
 
     dev_opt_spmm<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows);
 
-    cudaMemcpy(dmat_out_GPU , dmat_out_device ,mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
+    cudaMemcpy(dmat_out_GPU , dmat_out_device , mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
 
-    std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
+    //std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
     std::cout << "CPU\n";
     print_dmat(dmat_out, mat.nrows , K);
     std::cout << "GPU\n";
