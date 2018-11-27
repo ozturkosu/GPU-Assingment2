@@ -89,10 +89,10 @@ __global__ void dev_csc_spmm(unsigned int * deviceCSCcol_indx , unsigned int * d
 
 
 
-      //const int row=blockIdx.y * blockDim.y + threadIdx.y;
-      //const int col= blockIdx.x * blockDim.x + threadIdx.x ;
-      const int col=blockIdx.y * blockDim.y + threadIdx.y ;
-      const int row= blockIdx.x * blockDim.x + threadIdx.x ;
+      const int row=blockIdx.y * blockDim.y + threadIdx.y;
+      const int col= blockIdx.x * blockDim.x + threadIdx.x ;
+      //const int col=blockIdx.y * blockDim.y + threadIdx.y ;
+      //const int row= blockIdx.x * blockDim.x + threadIdx.x ;
 
 
       unsigned int numberOfColCSC = device_ncols ;
