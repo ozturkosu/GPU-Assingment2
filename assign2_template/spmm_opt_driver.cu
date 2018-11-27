@@ -147,7 +147,7 @@ __global__ void dev_opt_spmm_2(unsigned int * deviceCSRrow_indx , unsigned int *
 
 
 
-                __synctreads();
+                __syncthreads();
                 //dmat_out[ix][iy] = sum ;
                 //printf(" sum = %d thread %d , block %d \n", sum,  col , row);
 
