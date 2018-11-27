@@ -256,7 +256,7 @@ int main(int argc, char *argv[]) {
 
     cudaEventRecord(startEvent, 0);
 
-    dev_csr_spmm<<<dimGrid , dimBlock ,0 , stream >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows) ;
+    dev_csr_spmm<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows) ;
 
     cudaEventRecord(stopEvent, 0) ;
     cudaEventSynchronize(stopEvent);
