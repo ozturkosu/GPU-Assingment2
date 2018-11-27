@@ -174,14 +174,14 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
       //const int col= blockIdx.x * blockDim.x + threadIdx.x ;
       //const int warp_id = thread_id_x /32 ;
 
-      //const int irow= warp_id / K ;
-      //const int icol= warp_id & (K-1) ;
+      const int irow= warp_id / K ;
+      const int icol= warp_id & (K-1) ;
 
-      const int warp_idx = blockIdx.x;
-      const int warp_idy = blockIdx.y*blockDim.y + threadIdx.y;
+      //const int warp_idx = blockIdx.x;
+      //const int warp_idy = blockIdx.y*blockDim.y + threadIdx.y;
 
-      const int irow = warp_idy /2;
-      const int icol = warp_idx % K;
+      //const int irow = warp_idy /2;
+      //const int icol = warp_idx % K;
 
       //const int warpId= 128 * blockIdx.y + blockIdx.x * 32 + threadIdx.y;
 
@@ -326,8 +326,11 @@ int main(int argc, char *argv[]) {
 
 
     //dim3 dimGrid( ceil(K / TILE_WIDTH) , ceil(mat.nrows/TILE_WIDTH) , 1  ) ;
-    dim3 dimGrid( 128,128 , 1) ;
-    dim3 dimBlock(TILE_WIDTH, TILE_WIDTH , 1) ;
+    //dim3 dimGrid( 128,128 , 1) ;
+    //dim3 dimBlock(TILE_WIDTH, TILE_WIDTH , 1) ;
+
+    dim3 dimGrid( mat.nrows * K ,1 , 1) ;
+    dim3 dimBlock(TILE_WIDTH, 1 , 1) ;
 
     dev_opt_spmm<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows);
 
