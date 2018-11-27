@@ -12,7 +12,7 @@
 #include <iostream>
 
 
-#define TILE_WIDTH 32000
+#define TILE_WIDTH 16000
 
 void check_dmat(double* a, double *b, unsigned int n, unsigned int K, bool quit_on_err = true ) {
     for (unsigned int i = 0; i < n; ++i) {
@@ -318,7 +318,7 @@ int main(int argc, char *argv[]) {
 
 
     //dim3 dimGrid( ceil(K / TILE_WIDTH) , ceil(mat.nrows/TILE_WIDTH) , 1  ) ;
-    dim3 dimGrid( 1,10000 , 1) ;
+    dim3 dimGrid( 1,64000 , 1) ;
     dim3 dimBlock(1, TILE_WIDTH , 1) ;
 
     dev_opt_spmm<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows);
