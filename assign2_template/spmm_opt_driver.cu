@@ -12,7 +12,7 @@
 #include <iostream>
 
 
-#define TILE_WIDTH 16000
+#define TILE_WIDTH 32
 
 void check_dmat(double* a, double *b, unsigned int n, unsigned int K, bool quit_on_err = true ) {
     for (unsigned int i = 0; i < n; ++i) {
@@ -168,16 +168,20 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
      __shared__ double vals[TILE_WIDTH] ;
 
       //int row= blockIdx.y*blockDim.y + threadIdx.y ;
-      //const int thread_id_x=blockIdx.x * blockDim.x + threadIdx.x;
-      const int thread_id_x=blockIdx.y * blockDim.y + threadIdx.y;
+      const int thread_id_x=blockIdx.x * blockDim.x + threadIdx.x;
+      const int thread_id_y=blockIdx.y * blockDim.y + threadIdx.y;
 
       //const int col= blockIdx.x * blockDim.x + threadIdx.x ;
-      const int warp_id = thread_id_x /32 ;
+      //const int warp_id = thread_id_x /32 ;
 
-      const int irow= warp_id / K ;
-      const int icol= warp_id & (K-1) ;
+      //const int irow= warp_id / K ;
+      //const int icol= warp_id & (K-1) ;
 
+      const int warp_idx = blockIdx.x;
+      const int warp_idy = blockIdx.y*blockDim + threadIdx.y;
 
+      const irow = warp_idy *2 + warp_idx/64;
+      const icol = warp_idx % 64;
 
 
       int lane = thread_id_x & (31) ;
@@ -318,8 +322,8 @@ int main(int argc, char *argv[]) {
 
 
     //dim3 dimGrid( ceil(K / TILE_WIDTH) , ceil(mat.nrows/TILE_WIDTH) , 1  ) ;
-    dim3 dimGrid( 1,64000 , 1) ;
-    dim3 dimBlock(1, TILE_WIDTH , 1) ;
+    dim3 dimGrid( 128,128 , 1) ;
+    dim3 dimBlock(TILE_WIDTH, TILE_WIDTH , 1) ;
 
     dev_opt_spmm<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows);
 
