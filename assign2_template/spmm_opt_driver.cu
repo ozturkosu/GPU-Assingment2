@@ -198,7 +198,7 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
 
       if ( irow < numberOfRowCSR && icol < K) {
 
-            printf(" icol %d , irow %d \n",  icol , irow);
+            //printf(" icol %d , irow %d \n",  icol , irow);
 
             int colId;
 
