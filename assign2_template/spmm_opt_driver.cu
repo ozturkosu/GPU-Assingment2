@@ -129,7 +129,7 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
                   double value = deviceCSRvalues[element] ;
                   double value2 = dmat_in_device[colId * K + icol] ;
 
-                printf(" colId = %d thread %d , block %d \n", colId,  threadIdx.x , irow);
+                  printf(" colId = %d thread %d , block %d \n", colId,  threadIdx.x , irow);
 
                   vals[threadIdx.x] += value + value2 ;
 
@@ -143,7 +143,6 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
             //if(lane < 1 ) vals[threadIdx.x] += vals[threadIdx.x + 1 ] ;
 
             for (int d = 32 >> 1; d >= 1; d >>=1 ) {
-              /* code */
               if(lane < d) vals[threadIdx.x] += vals[threadIdx.x + d] ;
             }
 
@@ -151,7 +150,7 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
             //__synctreads();
             //dmat_out[ix][iy] = sum ;
             //printf(" sum = %d thread %d , block %d \n", sum,  col , row);
-            if(lane == 0) ;
+            if(lane == 0) 
               dmat_out_device[irow * K + icol] += vals[threadIdx.x] ;
             //printf("dvice matrix %d\n", dmat_out_device[row * K + col] );
       }
