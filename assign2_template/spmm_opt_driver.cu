@@ -215,8 +215,8 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
 
                   printf(" colId = %d thread %d , block %d \n", colId,  threadIdx.x , irow);
 
-                  vals[threadIdx.x] += value + value2 ;
-
+                  //vals[threadIdx.x] += value + value2 ;
+                  atomicAdd(&vals[threadIdx.x] ,value * value2 );
                   //printf(" sum =  %d ,thread %d , block %d", sum, col , row);
              }
             //Parallel Reduction
