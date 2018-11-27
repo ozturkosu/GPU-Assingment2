@@ -88,9 +88,11 @@ __global__ void dev_csc_spmm(unsigned int * deviceCSCcol_indx , unsigned int * d
    double * dmat_in_device, double* dmat_out_device ,  int K , unsigned int device_ncols , unsigned int device_nrows){
 
 
-      //int row= blockIdx.y*blockDim.y + threadIdx.y ;
-      const int row=blockIdx.y * blockDim.y + threadIdx.y;
-      const int col= blockIdx.x * blockDim.x + threadIdx.x ;
+
+      //const int row=blockIdx.y * blockDim.y + threadIdx.y;
+      //const int col= blockIdx.x * blockDim.x + threadIdx.x ;
+      const int col=blockIdx.y * blockDim.y + threadIdx.y ;
+      const int row= blockIdx.x * blockDim.x + threadIdx.x ;
 
 
       unsigned int numberOfColCSC = device_ncols ;
@@ -220,7 +222,8 @@ int main(int argc, char *argv[]) {
     //dim3 dimGrid((K-1) / TILE_WIDTH + 1 , (mat.ncols -1)/TILE_WIDTH +1 , 1  ) ;
     //
     //dim3 dimGrid( (K-1) / TILE_WIDTH +1  , (mat.ncols -1)/TILE_WIDTH+1 , 1  ) ;
-    dim3 dimGrid( (K-1) / TILE_WIDTH +1  , (mat.ncols -1)/TILE_WIDTH+1 , 1  ) ;
+    //dim3 dimGrid( (K-1) / TILE_WIDTH +1  , (mat.ncols -1)/TILE_WIDTH+1 , 1  ) ;
+    dim3 dimGrid(  (mat.ncols -1)/TILE_WIDTH+1 ,  (K-1) / TILE_WIDTH +1 , 1  ) ;
     dim3 dimBlock(TILE_WIDTH , TILE_WIDTH , 1) ;
 
     cudaEventRecord(startEvent, 0);
