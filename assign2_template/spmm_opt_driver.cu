@@ -183,9 +183,9 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
       //const int irow = warp_idy *(128/K) + warp_idx/K;
       //const int icol = warp_idx % K;
 
-      const warpId= 128 * blockIdx.y + blockIdy.x * 32 + threadIdx.y;
-      const irow = warpId /K ;
-      const icol= warpId % K;
+      const int warpId= 128 * blockIdx.y + blockIdx.x * 32 + threadIdx.y;
+      const int irow = warpId /K ;
+      const int icol= warpId % K;
 
       int lane = thread_id_x & (31) ;
 
