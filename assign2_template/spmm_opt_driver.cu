@@ -140,6 +140,7 @@ __global__ void dev_opt_spmm_2(unsigned int * deviceCSRrow_indx , unsigned int *
                       //printf(" sum =  %d ,thread %d , block %d", sum, col , row);
                  }
                 //Parallel Reduction
+                __syncthreads();
                 if(lane < 16) vals[threadIdx.x] += vals[threadIdx.x + 16] ;
                 if(lane < 8 ) vals[threadIdx.x] += vals[threadIdx.x + 8] ;
                 if(lane < 4 ) vals[threadIdx.x] += vals[threadIdx.x + 4] ;
@@ -148,7 +149,7 @@ __global__ void dev_opt_spmm_2(unsigned int * deviceCSRrow_indx , unsigned int *
 
 
 
-                __syncthreads();
+                //__syncthreads();
                 //dmat_out[ix][iy] = sum ;
                 //printf(" sum = %d thread %d , block %d \n", sum,  col , row);
 
