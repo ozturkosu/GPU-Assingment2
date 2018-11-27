@@ -212,7 +212,7 @@ int main(int argc, char *argv[]) {
 
     //copy to device
     cudaMemcpy( dmat_in_device , dmat_in , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
-    cudaMemcpy( dmat_out_D, dmat_out_device,  mat.nrows * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
+    //cudaMemcpy( dmat_out_D, dmat_out_device,  mat.nrows * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
 
 
     //Initialize the Grid and Block Dimension
@@ -256,7 +256,7 @@ int main(int argc, char *argv[]) {
     std::cout << "GPU\n";
     print_dmat(dmat_out_GPU,  mat.nrows , K);
 
-    check_dmat(dmat_out, dmat_out_D, mat.nrows, K);
+    check_dmat(dmat_out, dmat_out_GPU, mat.nrows, K);
 
     //Lets compute GFLOP
     unsigned int twoKnnz= 2 * K * mat.nnz ;
