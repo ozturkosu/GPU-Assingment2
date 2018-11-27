@@ -190,7 +190,7 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
 
       if ( irow < numberOfRowCSR && icol < K) {
 
-            printf(" icol %d , irow %d \n",  icol , irow);
+            //printf(" icol %d , irow %d \n",  icol , irow);
 
             int colId;
 
@@ -326,10 +326,10 @@ int main(int argc, char *argv[]) {
     cudaMemcpy(dmat_out_GPU , dmat_out_device , mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
 
     //std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
-    std::cout << "CPU\n";
-    print_dmat(dmat_out, mat.nrows , K);
-    std::cout << "GPU\n";
-    print_dmat(dmat_out_GPU,  mat.nrows , K);
+    //std::cout << "CPU\n";
+    //print_dmat(dmat_out, mat.nrows , K);
+    //std::cout << "GPU\n";
+    //print_dmat(dmat_out_GPU,  mat.nrows , K);
 
     check_dmat(dmat_out, dmat_out_GPU, mat.nrows, K);
 
