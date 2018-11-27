@@ -15,7 +15,7 @@
 #include <cuda.h>
 #include <stdlib.h>
 
-//#define TILE_WIDTH 32
+#define TILE_WIDTH 32
 
 void check_dmat(double* a, double *b,  int n,  int K, bool quit_on_err = true ) {
     for ( int i = 0; i < n; ++i) {
@@ -163,7 +163,7 @@ int main(int argc, char *argv[]) {
     CSR mat = read_matrix_market_to_CSR(argv[1]);
     //print_CSR(mat);
 
-    int TILE_WIDTH = K +1 ;
+    //int TILE_WIDTH = K +1 ;
 
     //Cuda Events
     // events for timing
@@ -284,10 +284,10 @@ int main(int argc, char *argv[]) {
     cudaEventElapsedTime(&timeforMemKernel, startEventMemKer, stopEventMemKer) ;
     printf("  Time for Mem Cpy and Kernel : %f\n",  timeforMemKernel);
 
-    //std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
-    //std::cout << "CPU\n";
-    //print_dmat(dmat_out, mat.nrows , K);
-    //std::cout << "GPU\n";
+    std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
+    std::cout << "CPU\n";
+    print_dmat(dmat_out, mat.nrows , K);
+    std::cout << "GPU\n";
     print_dmat(dmat_out_GPU,  mat.nrows , K);
     check_dmat(dmat_out, dmat_out_GPU, mat.nrows, K);
 
