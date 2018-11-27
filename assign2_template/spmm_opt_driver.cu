@@ -79,6 +79,86 @@ void host_csr_spmm(CSR &mat, double * dmat_in, double * dmat_out, unsigned int K
 }
 
 //Emin Code start
+__global__ void dev_opt_spmm_2(unsigned int * deviceCSRrow_indx , unsigned int * deviceCSRcol_id  ,  double * deviceCSRvalues,
+   double * dmat_in_device, double* dmat_out_device ,  int K , unsigned int device_nrows ){
+
+     __shared__ double vals[TILE_WIDTH] ;
+
+      //int row= blockIdx.y*blockDim.y + threadIdx.y ;
+      const int thread_id_x=blockIdx.x * blockDim.x + threadIdx.x;
+      const int thread_id_y=blockIdx.y * blockDim.y + threadIdx.y;
+
+      //const int col= blockIdx.x * blockDim.x + threadIdx.x ;
+      const int warp_id = thread_id_x /32 ;
+
+      //const int irow= warp_id / K ;
+      //onst int icol= warp_id & (K-1) ;
+
+      int irow=warp_id ;
+      int lane = thread_id_x & (31) ;
+
+
+      unsigned int numberOfRowCSR = device_nrows ;
+
+      //const int row = blockIdx.x * blockDim.x + threadIdx.x ;
+      //printf(" Rows = %d thread %d , block %d \n", numberOfRowCSR,  col , row);
+
+      if ( irow < numberOfRowCSR ) {
+
+          for(icol =0 ; icol < K ; icol++)
+          {
+                //printf(" icol %d , irow %d \n",  icol , irow);
+
+                int colId;
+
+                // int row_start = A.row_indx[iy] ;
+                 unsigned int row_start = deviceCSRrow_indx[irow];
+                 //printf(" row_start = %d thread %d , block %d \n", row_start,  col , row);
+                // int row_end = A.row_indx[iy + 1] ;
+                 unsigned int row_end = deviceCSRrow_indx[irow+1] ;
+                 //printf(" row_end = %d thread %d , block %d \n", row_end,  col , row);
+
+                 //dmat_out_device[row * K + col] =0;
+
+                 vals[threadIdx.x] = 0 ;
+
+                 for ( int element = row_start + lane ; element < row_end; element+=32) {
+                      /* code */
+
+                      //colId= A.col_id[i] ;
+                      colId = deviceCSRcol_id[element] ;
+                      //printf(" colId = %d thread %d , block %d \n", colId,  col , row);
+
+                      double value = deviceCSRvalues[element] ;
+                      double value2 = dmat_in_device[colId * K + icol] ;
+
+                      printf(" colId = %d thread %d , block %d \n", colId,  threadIdx.x , irow);
+
+                      vals[threadIdx.x] += value + value2 ;
+
+                      //printf(" sum =  %d ,thread %d , block %d", sum, col , row);
+                 }
+                Parallel Reduction
+                if(lane < 16) vals[threadIdx.x] += vals[threadIdx.x + 16] ;
+                if(lane < 8 ) vals[threadIdx.x] += vals[threadIdx.x + 8] ;
+                if(lane < 4 ) vals[threadIdx.x] += vals[threadIdx.x + 4] ;
+                if(lane < 2 ) vals[threadIdx.x] += vals[threadIdx.x + 2 ] ;
+                if(lane < 1 ) vals[threadIdx.x] += vals[threadIdx.x + 1 ] ;
+
+
+
+                //__synctreads();
+                //dmat_out[ix][iy] = sum ;
+                //printf(" sum = %d thread %d , block %d \n", sum,  col , row);
+                if(lane == 0)
+                  dmat_out_device[irow * K + icol] += vals[threadIdx.x] ;
+                //printf("dvice matrix %d\n", dmat_out_device[row * K + col] );
+          }
+      }
+
+}
+
+//Emin Code start
 __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * deviceCSRcol_id  ,  double * deviceCSRvalues,
    double * dmat_in_device, double* dmat_out_device ,  int K , unsigned int device_nrows ){
 
@@ -105,7 +185,7 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
       //const int row = blockIdx.x * blockDim.x + threadIdx.x ;
       //printf(" Rows = %d thread %d , block %d \n", numberOfRowCSR,  col , row);
 
-      if ( (irow < numberOfRowCSR) && icol < K) {
+      if ( irow < numberOfRowCSR && icol < K) {
 
             printf(" icol %d , irow %d \n",  icol , irow);
 
