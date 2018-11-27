@@ -180,8 +180,8 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
       const int warp_idx = blockIdx.x;
       const int warp_idy = blockIdx.y*blockDim + threadIdx.y;
 
-      const irow = warp_idy *2 + warp_idx/64;
-      const icol = warp_idx % 64;
+      const int irow = warp_idy *2 + warp_idx/64;
+      const int icol = warp_idx % 64;
 
 
       int lane = thread_id_x & (31) ;
