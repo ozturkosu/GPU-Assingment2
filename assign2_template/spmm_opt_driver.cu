@@ -222,11 +222,12 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
                   //printf(" sum =  %d ,thread %d , block %d", sum, col , row);
              }
             //Parallel Reduction
-            //if(lane < 16) vals[threadIdx.x] += vals[threadIdx.x + 16] ;
-            //if(lane < 8 ) vals[threadIdx.x] += vals[threadIdx.x + 8] ;
-            //if(lane < 4 ) vals[threadIdx.x] += vals[threadIdx.x + 4] ;
-            //if(lane < 2 ) vals[threadIdx.x] += vals[threadIdx.x + 2 ] ;
-            //if(lane < 1 ) vals[threadIdx.x] += vals[threadIdx.x + 1 ] ;
+            __syncthreads();
+            if(lane < 16) vals[threadIdx.x] += vals[threadIdx.x + 16] ;
+            if(lane < 8 ) vals[threadIdx.x] += vals[threadIdx.x + 8] ;
+            if(lane < 4 ) vals[threadIdx.x] += vals[threadIdx.x + 4] ;
+            if(lane < 2 ) vals[threadIdx.x] += vals[threadIdx.x + 2 ] ;
+            if(lane < 1 ) vals[threadIdx.x] += vals[threadIdx.x + 1 ] ;
 
             for (int d = 32 >> 1; d >= 1; d >>=1 ) {
               if(lane < d) vals[threadIdx.x] += vals[threadIdx.x + d] ;
@@ -320,7 +321,7 @@ int main(int argc, char *argv[]) {
     dim3 dimGrid(mat.nrows * K +1 , 1, 1) ;
     dim3 dimBlock(TILE_WIDTH , 1, 1) ;
 
-    dev_opt_spmm_2<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows);
+    dev_opt_spmm<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows);
 
     cudaMemcpy(dmat_out_GPU , dmat_out_device , mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
 
