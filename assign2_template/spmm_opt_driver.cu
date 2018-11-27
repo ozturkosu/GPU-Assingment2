@@ -119,7 +119,7 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
 
              vals[threadIdx.x] = 0 ;
 
-            for ( int element = row_start + lane ; element < row_end; element+=32) {
+             for ( int element = row_start + lane ; element < row_end; element+=32) {
                   /* code */
 
                   //colId= A.col_id[i] ;
@@ -132,13 +132,19 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
                   vals[threadIdx.x] += value + value2 ;
 
                   //printf(" sum =  %d ,thread %d , block %d", sum, col , row);
-            }
+             }
             //Parallel Reduction
-            if(lane < 16) vals[threadIdx.x] += vals[threadIdx.x + 16] ;
-            if(lane < 8 ) vals[threadIdx.x] += vals[threadIdx.x + 8] ;
-            if(lane < 4 ) vals[threadIdx.x] += vals[threadIdx.x + 4] ;
-            if(lane < 2 ) vals[threadIdx.x] += vals[threadIdx.x + 2 ] ;
-            if(lane < 1 ) vals[threadIdx.x] += vals[threadIdx.x + 1 ] ;
+            //if(lane < 16) vals[threadIdx.x] += vals[threadIdx.x + 16] ;
+            //if(lane < 8 ) vals[threadIdx.x] += vals[threadIdx.x + 8] ;
+            //if(lane < 4 ) vals[threadIdx.x] += vals[threadIdx.x + 4] ;
+            //if(lane < 2 ) vals[threadIdx.x] += vals[threadIdx.x + 2 ] ;
+            //if(lane < 1 ) vals[threadIdx.x] += vals[threadIdx.x + 1 ] ;
+
+            for (int d = 32 >> 1; d >= 1; d >>=1 ) {
+              /* code */
+              if(lane < d) vals[threadIdx.x] += vals[threadIdx.x + d] ;
+            }
+
 
             //__synctreads();
             //dmat_out[ix][iy] = sum ;
@@ -220,7 +226,7 @@ int main(int argc, char *argv[]) {
 
     //copy to device
     cudaMemcpy( dmat_in_device , dmat_in , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
-    cudaMemcpy( dmat_out_device, dmat_out, mat.nrows * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
+    //cudaMemcpy( dmat_out_device, dmat_out, mat.nrows * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
 
 
     //dim3 dimGrid( ceil(K / TILE_WIDTH) , ceil(mat.nrows/TILE_WIDTH) , 1  ) ;
@@ -244,8 +250,8 @@ int main(int argc, char *argv[]) {
     printf("  2 * K * nnz : %d\n",  twoKnnz);
 
 
-    //float GFLOP = (twoKnnz / timeforMemKernel ) ;
-  //  printf("  GFLOP : %f\n",  GFLOP);
+    float GFLOP = (twoKnnz / timeforMemKernel ) ;
+    printf("  GFLOP : %f\n",  GFLOP);
 
     //print_dmat(dmat_out, mat.nrows, K);
 
