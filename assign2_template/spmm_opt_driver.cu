@@ -105,7 +105,7 @@ __global__ void dev_opt_spmm_2(unsigned int * deviceCSRrow_indx , unsigned int *
 
       if ( irow < numberOfRowCSR ) {
 
-          for(icol =0 ; icol < K ; icol++)
+          for(int icol =0 ; icol < K ; icol++)
           {
                 //printf(" icol %d , irow %d \n",  icol , irow);
 
