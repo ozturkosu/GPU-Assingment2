@@ -229,9 +229,9 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
             if(lane < 2 ) vals[threadIdx.x] += vals[threadIdx.x + 2 ] ;
             if(lane < 1 ) vals[threadIdx.x] += vals[threadIdx.x + 1 ] ;
 
-            for (int d = 32 >> 1; d >= 1; d >>=1 ) {
-              if(lane < d) vals[threadIdx.x] += vals[threadIdx.x + d] ;
-            }
+            //for (int d = 32 >> 1; d >= 1; d >>=1 ) {
+            //  if(lane < d) vals[threadIdx.x] += vals[threadIdx.x + d] ;
+            //}
 
 
             //__synctreads();
