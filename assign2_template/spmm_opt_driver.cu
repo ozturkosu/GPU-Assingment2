@@ -147,9 +147,10 @@ __global__ void dev_opt_spmm_2(unsigned int * deviceCSRrow_indx , unsigned int *
 
 
 
-                //__synctreads();
+                __synctreads();
                 //dmat_out[ix][iy] = sum ;
                 //printf(" sum = %d thread %d , block %d \n", sum,  col , row);
+
                 if(lane == 0)
                   dmat_out_device[irow * K + icol] += vals[threadIdx.x] ;
                 //printf("dvice matrix %d\n", dmat_out_device[row * K + col] );
