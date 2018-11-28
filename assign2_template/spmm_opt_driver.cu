@@ -343,8 +343,8 @@ int main(int argc, char *argv[]) {
     int count= (mat.nrows * K -1)/ MAX_BLOCK+1;
 
     int numberofBlocks= mat.nrows *K;
-    printf("Number of blocks is %d\n", );
-
+    printf("Number of blocks is %d\n", numberofBlocks);
+    printf("Number of count is %d\n", count);
     for (int i = 0; i < count; i++) {
       /* code */
 
