@@ -297,6 +297,31 @@ int main(int argc, char *argv[]) {
     pinnedMat.nnz = mat.nnz ;
 
     */
+    //Cuda Events
+    // events for timing
+    cudaEvent_t startEvent, stopEvent;
+    cudaEventCreate(&startEvent) ;
+    cudaEventCreate(&stopEvent)  ;
+
+
+    cudaEvent_t startEventMemKer , stopEventMemKer ;
+    cudaEventCreate(&startEventMemKer);
+    cudaEventCreate(&stopEventMemKer) ;
+
+    //Lets implement pinned memory
+    CSR pinnedMat;
+    cudaHostAlloc(&pinnedMat.row_indx , (mat.nrows +1)* sizeof(unsigned int), cudaHostAllocMapped ) ;
+    cudaHostAlloc(&pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaHostAllocMapped) ;
+    cudaHostAlloc(&pinnedMat.values , mat.nnz * sizeof(double), cudaHostAllocMapped) ;
+
+    memcpy(pinnedMat.row_indx , mat.row_indx ,(mat.nrows +1)* sizeof(unsigned int)) ;
+    memcpy(pinnedMat.col_id , mat.col_id ,mat.nnz * sizeof(unsigned int) ) ;
+    memcpy(pinnedMat.values , mat.values ,mat.nnz * sizeof(double)) ;
+
+    pinnedMat.nrows=mat.nrows ;
+    pinnedMat.ncols=mat.ncols ;
+    pinnedMat.nnz = mat.nnz ;
+
 
 
 
@@ -322,11 +347,15 @@ int main(int argc, char *argv[]) {
     double *dmat_out_device ;
     cudaMalloc((void**) &dmat_out_device, mat.nrows * K * sizeof(double)) ;
 
+    cudaEventRecord(startEventMemKer, 0);
 
+    //cudaMemcpy(deviceCSRrow_indx , mat.row_indx ,(mat.nrows+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
+    //cudaMemcpy(deviceCSRcol_id , mat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice ) ;
+    //cudaMemcpy(deviceCSRvalues , mat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice)  ;
 
-    cudaMemcpy(deviceCSRrow_indx , mat.row_indx ,(mat.nrows+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
-    cudaMemcpy(deviceCSRcol_id , mat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice ) ;
-    cudaMemcpy(deviceCSRvalues , mat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice)  ;
+    cudaMemcpy(deviceCSRrow_indx , pinnedMat.row_indx ,(mat.nrows+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice );
+    cudaMemcpy(deviceCSRcol_id , pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice );
+    cudaMemcpy(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice )  ;
 
     //copy to device
     cudaMemcpy( dmat_in_device , dmat_in , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
@@ -351,7 +380,7 @@ int main(int argc, char *argv[]) {
 
     dim3 dimGridlast( numberofBlocks-(MAX_BLOCK * count ),1 , 1) ;
 
-
+    cudaEventRecord(startEvent, 0);
     for (int i = 0; i < count; i++) {
       /* code */
 
@@ -364,21 +393,35 @@ int main(int argc, char *argv[]) {
 
     cudaDeviceSynchronize();
 
+    cudaEventRecord(stopEvent, 0) ;
+
+
+
     cudaMemcpy(dmat_out_GPU , dmat_out_device , mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
 
+    cudaEventRecord(stopEventMemKer, 0) ;
 
-
+    cudaEventSynchronize(startEventMemKer);
+    cudaEventSynchronize(stopEventMemKer);
     //std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
     //std::cout << "CPU\n";
     //print_dmat(dmat_out, mat.nrows , K);
     //std::cout << "GPU\n";
     //print_dmat(dmat_out_GPU,  mat.nrows , K);
 
+    float timeforMemKernel;
+    cudaEventElapsedTime(&timeforMemKernel, startEventMemKer, stopEventMemKer) ;
+    printf("  Time for Mem Cpy and Kernel : %f\n",  timeforMemKernel);
+
     check_dmat(dmat_out, dmat_out_GPU, mat.nrows, K);
 
     //Lets compute GFLOP
     unsigned int twoKnnz= 2 * K * mat.nnz ;
     printf("  2 * K * nnz : %d\n",  twoKnnz);
+
+
+    float GFLOP = (twoKnnz / timeforMemKernel )/1000000 ;
+    printf("  GFLOP : %f\n",  GFLOP);
 
 
     //float GFLOP = (twoKnnz / timeforMemKernel ) ;
@@ -394,6 +437,10 @@ int main(int argc, char *argv[]) {
     cudaFree(deviceCSRrow_indx) ;
     cudaFree(deviceCSRcol_id) ;
     cudaFree(deviceCSRvalues) ;
+
+    cudaFreeHost(pinnedMat.row_indx);
+    cudaFreeHost(pinnedMat.col_id) ;
+    cudaFreeHost(pinnedMat.values) ;
 
 
 
