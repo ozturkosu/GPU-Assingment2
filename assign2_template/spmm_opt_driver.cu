@@ -134,7 +134,7 @@ __global__ void dev_opt_spmm_2(unsigned int * deviceCSRrow_indx , unsigned int *
                       double value = deviceCSRvalues[element] ;
                       double value2 = dmat_in_device[colId * K + icol] ;
 
-                      printf(" colId = %d thread %d , block %d \n", colId,  threadIdx.x , irow);
+                      //printf(" colId = %d thread %d , block %d \n", colId,  threadIdx.x , irow);
 
                       //vals[threadIdx.x] += value + value2 ;
                         atomicAdd(&vals[threadIdx.x] ,value * value2 );
