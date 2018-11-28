@@ -13,6 +13,7 @@
 
 
 #define TILE_WIDTH 32
+#define MAX_BLOCK 50000
 
 void check_dmat(double* a, double *b, unsigned int n, unsigned int K, bool quit_on_err = true ) {
     for (unsigned int i = 0; i < n; ++i) {
@@ -80,7 +81,7 @@ void host_csr_spmm(CSR &mat, double * dmat_in, double * dmat_out, unsigned int K
 
 //Emin Code start
 __global__ void dev_opt_spmm_2(unsigned int * deviceCSRrow_indx , unsigned int * deviceCSRcol_id  ,  double * deviceCSRvalues,
-   double * dmat_in_device, double* dmat_out_device ,  int K , unsigned int device_nrows ){
+   double * dmat_in_device, double* dmat_out_device ,  int K , unsigned int device_nrows , int kernelId){
 
      __shared__ double vals[TILE_WIDTH] ;
 
@@ -163,13 +164,19 @@ __global__ void dev_opt_spmm_2(unsigned int * deviceCSRrow_indx , unsigned int *
 
 //Emin Code start
 __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * deviceCSRcol_id  ,  double * deviceCSRvalues,
-   double * dmat_in_device, double* dmat_out_device ,  int K , unsigned int device_nrows ){
+   double * dmat_in_device, double* dmat_out_device ,  int K , unsigned int device_nrows , int kernelId){
 
      __shared__ double vals[TILE_WIDTH] ;
 
       //int row= blockIdx.y*blockDim.y + threadIdx.y ;
-      const int thread_id_x=blockIdx.x * blockDim.x + threadIdx.x;
-      const int thread_id_y=blockIdx.y * blockDim.y + threadIdx.y;
+      //const int thread_id_x=blockIdx.x * blockDim.x + threadIdx.x;
+      //const int thread_id_y=blockIdx.y * blockDim.y + threadIdx.y;
+
+      const int thread_id_x=(blockIdx.x + kernelId) * blockDim.x + threadIdx.x;
+      //const int thread_id_y=blockIdx.y * blockDim.y + threadIdx.y;
+
+
+
 
       //const int col= blockIdx.x * blockDim.x + threadIdx.x ;
       const int warp_id = thread_id_x /32 ;
@@ -329,10 +336,18 @@ int main(int argc, char *argv[]) {
     //dim3 dimGrid( 128,128 , 1) ;
     //dim3 dimBlock(TILE_WIDTH, TILE_WIDTH , 1) ;
 
-    dim3 dimGrid( mat.nrows * K ,1 , 1) ;
+    //dim3 dimGrid( mat.nrows * K ,1 , 1) ;
+    dim3 dimGrid( MAX_BLOCK ,1 , 1) ;
     dim3 dimBlock(TILE_WIDTH, 1 , 1) ;
 
-    dev_opt_spmm<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows);
+    int count= (mat.nrows * K )/ MAX_BLOCK;
+
+    for (int i = 0; i < count; i++) {
+      /* code */
+
+      dev_opt_spmm<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows ,  i*MAX_BLOCK);
+
+    }
 
     cudaMemcpy(dmat_out_GPU , dmat_out_device , mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
 
