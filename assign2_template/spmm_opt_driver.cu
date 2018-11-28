@@ -338,19 +338,27 @@ int main(int argc, char *argv[]) {
 
     //dim3 dimGrid( mat.nrows * K ,1 , 1) ;
     dim3 dimGrid( MAX_BLOCK ,1 , 1) ;
+
     dim3 dimBlock(TILE_WIDTH, 1 , 1) ;
 
-    int count= (mat.nrows * K -1)/ MAX_BLOCK+1;
+    int count= (mat.nrows * K )/ MAX_BLOCK;
+
 
     int numberofBlocks= mat.nrows *K;
     printf("Number of blocks is %d\n", numberofBlocks);
     printf("Number of count is %d\n", count);
+
+    dim3 dimGridlast( numberofBlocks/(MAX_BLOCK * count ),1 , 1) ;
+
+
     for (int i = 0; i < count; i++) {
       /* code */
 
       dev_opt_spmm<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows ,  i*MAX_BLOCK);
 
     }
+    if(numberofBlocks/(MAX_BLOCK * count ) >0)
+      dev_opt_spmm<<<dimGridlast , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows ,  i*MAX_BLOCK);
 
     cudaMemcpy(dmat_out_GPU , dmat_out_device , mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
 
