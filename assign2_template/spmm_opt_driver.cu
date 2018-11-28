@@ -412,6 +412,9 @@ int main(int argc, char *argv[]) {
     float timeforMemKernel;
     cudaEventElapsedTime(&timeforMemKernel, startEventMemKer, stopEventMemKer) ;
     printf("  Time for Mem Cpy and Kernel : %f\n",  timeforMemKernel);
+
+    float timeforKernel;
+    cudaEventElapsedTime(&timeforKernel, startEvent, stopEvent) ;
     printf("  Time for Kernel : %f\n",  timeforKernel);
 
     check_dmat(dmat_out, dmat_out_GPU, mat.nrows, K);
