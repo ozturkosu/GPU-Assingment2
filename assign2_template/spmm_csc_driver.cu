@@ -267,7 +267,7 @@ int main(int argc, char *argv[]) {
     printf("  2 * K * nnz : %d\n",  twoKnnz);
 
 
-    float GFLOP = (twoKnnz / timeforMemKernel ) ;
+    float GFLOP = (twoKnnz / timeforMemKernel )/1000000; ;
     printf("  GFLOP : %f\n",  GFLOP);
 
 
