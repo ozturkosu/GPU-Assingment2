@@ -391,7 +391,7 @@ int main(int argc, char *argv[]) {
       dev_opt_spmm<<<dimGridlast , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows ,  count*MAX_BLOCK);
       //dev_opt_spmm_2<<<dimGridlast , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows ,  count*MAX_BLOCK);
 
-    cudaDeviceSynchronize();
+    //cudaDeviceSynchronize();
 
     cudaEventRecord(stopEvent, 0) ;
 
@@ -412,6 +412,7 @@ int main(int argc, char *argv[]) {
     float timeforMemKernel;
     cudaEventElapsedTime(&timeforMemKernel, startEventMemKer, stopEventMemKer) ;
     printf("  Time for Mem Cpy and Kernel : %f\n",  timeforMemKernel);
+    printf("  Time for Kernel : %f\n",  timeforKernel);
 
     check_dmat(dmat_out, dmat_out_GPU, mat.nrows, K);
 
