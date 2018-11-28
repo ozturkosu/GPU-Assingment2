@@ -340,7 +340,7 @@ int main(int argc, char *argv[]) {
     dim3 dimGrid( MAX_BLOCK ,1 , 1) ;
     dim3 dimBlock(TILE_WIDTH, 1 , 1) ;
 
-    int count= (mat.nrows * K )/ MAX_BLOCK;
+    int count= (mat.nrows * K -1)/ MAX_BLOCK+1;
 
     for (int i = 0; i < count; i++) {
       /* code */
