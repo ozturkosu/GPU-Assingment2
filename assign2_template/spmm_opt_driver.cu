@@ -86,8 +86,9 @@ __global__ void dev_opt_spmm_2(unsigned int * deviceCSRrow_indx , unsigned int *
      __shared__ double vals[TILE_WIDTH] ;
 
       //int row= blockIdx.y*blockDim.y + threadIdx.y ;
-      const int thread_id_x=blockIdx.x * blockDim.x + threadIdx.x;
-      const int thread_id_y=blockIdx.y * blockDim.y + threadIdx.y;
+      //const int thread_id_x=blockIdx.x * blockDim.x + threadIdx.x;
+      //const int thread_id_y=blockIdx.y * blockDim.y + threadIdx.y;
+        const int thread_id_x=(blockIdx.x + kernelId) * blockDim.x + threadIdx.x;
 
       //const int col= blockIdx.x * blockDim.x + threadIdx.x ;
       const int warp_id = thread_id_x /32 ;
@@ -354,11 +355,11 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < count; i++) {
       /* code */
 
-      dev_opt_spmm<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows ,  i*MAX_BLOCK);
+      dev_opt_spmm2<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows ,  i*MAX_BLOCK);
 
     }
     if(numberofBlocks-(MAX_BLOCK * count ) >0)
-      dev_opt_spmm<<<dimGridlast , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows ,  count*MAX_BLOCK);
+      dev_opt_spmm2<<<dimGridlast , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows ,  count*MAX_BLOCK);
 
     cudaDeviceSynchronize();
 
