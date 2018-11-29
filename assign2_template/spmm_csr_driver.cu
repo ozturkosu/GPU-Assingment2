@@ -254,6 +254,7 @@ int main(int argc, char *argv[]) {
     cudaMemcpyAsync(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice , stream0 )  ;
     cudaMemcpyAsync( dmat_in_device , dmat_in , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice , stream0 ) ;
       cudaStreamSynchronize(stream0);
+      cudaStreamCreate(&stream0) ;
 
     for (int i = 0; i < count; i++) {
       /* code */
