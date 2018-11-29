@@ -451,7 +451,7 @@ int main(int argc, char *argv[]) {
     //std::cout << "CPU\n";
     //print_dmat(dmat_out, mat.nrows , K);
     //std::cout << "GPU\n";
-    //print_dmat(dmat_out_GPU,  mat.nrows , K);
+    print_dmat(dmat_out_GPU,  mat.nrows , K);
 
     float timeforMemKernel;
     cudaEventElapsedTime(&timeforMemKernel, startEventMemKer, stopEventMemKer) ;
