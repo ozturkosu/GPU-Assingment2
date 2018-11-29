@@ -379,7 +379,7 @@ int main(int argc, char *argv[]) {
 
       cudaMemcpyAsync(deviceCSRrow_indx + start , pinnedMat.row_indx + start, (end - start +1 )* sizeof(unsigned int) , cudaMemcpyHostToDevice, stream[i]) ;
 
-      dim3 dimGrid( ( end -start -1 -1)/TILE_WIDTH +1 ) *K, 1 ,  1  ) ;
+      dim3 dimGrid( (( end -start -1 -1)/TILE_WIDTH +1 ) *K, 1 ,  1  ) ;
 
       dim3 dimBlock(TILE_WIDTH, 1 , 1) ; //
 
