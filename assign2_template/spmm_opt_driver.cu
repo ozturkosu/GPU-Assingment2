@@ -349,7 +349,7 @@ int main(int argc, char *argv[]) {
 
           const int start = i * CHUNK_SIZE ;
           //const int end  = min(mat.nrows , (i +1) * CHUNK_SIZE) ;
-
+          int end;
           if(mat.nrows < (i +1) * CHUNK_SIZE)
               end = mat.nrows;
           else
