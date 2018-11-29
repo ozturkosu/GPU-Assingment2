@@ -247,7 +247,7 @@ int main(int argc, char *argv[]) {
     const int count = (mat.nrows -1 ) / CHUNK_SIZE +1 ;
     cudaStream_t * stream = new cudaStream_t[count] ;
 
-    
+
 
       cudaStreamCreate(&stream[0]) ;
 
@@ -261,7 +261,7 @@ int main(int argc, char *argv[]) {
     for (int i = 1; i <= count; i++) {
       /* code */
 
-          cudaStreamCreate(&stream[k]) ;
+          cudaStreamCreate(&stream[i]) ;
 
         const int start = i * CHUNK_SIZE ;
         const int end  = min(mat.nrows , (i +1) *CHUNK_SIZE) ;
