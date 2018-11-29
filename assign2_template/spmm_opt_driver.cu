@@ -364,6 +364,7 @@ int main(int argc, char *argv[]) {
     cudaMemcpyAsync( dmat_in_device , dmat_in , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice ,0) ;
     //cudaMemcpy( dmat_out_device, dmat_out, mat.nrows * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
 
+    int count = (mat.nrows- 1) / CHUNK_SIZE + 1;
     cudaStream_t * stream = new cudaStream_t[count] ;
 
     for (int i = 0; i < count; i++) {
@@ -378,7 +379,7 @@ int main(int argc, char *argv[]) {
 
       cudaMemcpyAsync(deviceCSRrow_indx + start , pinnedMat.row_indx + start, (end - start +1 )* sizeof(unsigned int) , cudaMemcpyHostToDevice, stream[i]) ;
 
-      dim3 dimGrid( ()( end -start -1 -1)/TILE_WIDTH +1 ) *K, 1 ,  1  ) ;
+      dim3 dimGrid( ( end -start -1 -1)/TILE_WIDTH +1 ) *K, 1 ,  1  ) ;
 
       dim3 dimBlock(TILE_WIDTH, 1 , 1) ; //
 
