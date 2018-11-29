@@ -377,12 +377,14 @@ int main(int argc, char *argv[]) {
 
       int dif= end-start;
 
-      //printf("end -start = %i\n ", dif);
+      printf("end -start = %i\n ", dif);
+
+      printf("stream number  = %d\n", i);
 
 
       cudaMemcpyAsync(deviceCSRrow_indx + start , pinnedMat.row_indx + start, (end - start +1 )* sizeof(unsigned int) , cudaMemcpyHostToDevice, stream[i]) ;
 
-      dim3 dimGrid( (( end -start -1 -1)/TILE_WIDTH +1 ) *K, 1 ,  1  ) ;
+      dim3 dimGrid( ( end -start -1 ) *K, 1 ,  1  ) ;
       dim3 dimBlock(TILE_WIDTH, 1 , 1) ; //
 
       dev_opt_spmm<<<dimGrid ,  dimBlock , 0, stream[i] >>>(deviceCSRrow_indx + start, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , (dmat_out_device + start * K ), K , end-start); //
