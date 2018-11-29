@@ -387,7 +387,9 @@ int main(int argc, char *argv[]) {
 
           cudaMemcpyAsync(deviceCSRrow_indx + start , pinnedMat.row_indx + start, (end - start +1 )* sizeof(unsigned int) , cudaMemcpyHostToDevice, stream[i]) ;
 
-          dim3 dimGrid( ( end -start  ) *K, 1 ,  1  ) ;
+          //dim3 dimGrid( ( end -start  ) *K, 1 ,  1  ) ;
+
+          dim3 dimGrid( ( end -start  ) +1 , 1 ,  1  ) ;
           dim3 dimBlock(TILE_WIDTH, 1 , 1) ; //
 
           dev_opt_spmm_2<<<dimGrid ,  dimBlock , 0, stream[i] >>>(deviceCSRrow_indx + start, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , (dmat_out_device + start * K ), K , end-start); //
@@ -449,10 +451,10 @@ int main(int argc, char *argv[]) {
     cudaEventSynchronize(stopEventMemKer);
 
 
-    //std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
-    //std::cout << "CPU\n";
-    //print_dmat(dmat_out, mat.nrows , K);
-    //std::cout << "GPU\n";
+    std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
+    std::cout << "CPU\n";
+    print_dmat(dmat_out, mat.nrows , K);
+    std::cout << "GPU\n";
     print_dmat(dmat_out_GPU,  mat.nrows , K);
 
     float timeforMemKernel;
