@@ -347,7 +347,7 @@ int main(int argc, char *argv[]) {
     cudaFreeHost(pinnedMat.values) ;
 
     delete [] stream;
-    delete stream0 ;
+    //delete stream0 ;
 
     //cudaFree(device_nrows) ;
     //cudaFree(device_ncols) ;
