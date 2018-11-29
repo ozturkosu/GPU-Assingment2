@@ -249,7 +249,7 @@ int main(int argc, char *argv[]) {
     cudaStream_t stream0 ;
 
 
-    cudaStreamCreate(stream0) ;
+    //cudaStreamCreate(stream0) ;
 
     cudaMemcpyAsync(deviceCSRrow_indx , pinnedMat.row_indx ,(mat.nrows+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice, stream0) ;
     cudaMemcpyAsync(deviceCSRcol_id , pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice , stream0);
