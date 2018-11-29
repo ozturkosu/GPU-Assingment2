@@ -14,6 +14,7 @@
 
 #define TILE_WIDTH 32
 #define MAX_BLOCK 50000
+#define CHUNK_SIZE 1000
 
 void check_dmat(double* a, double *b, unsigned int n, unsigned int K, bool quit_on_err = true ) {
     for (unsigned int i = 0; i < n; ++i) {
@@ -354,33 +355,66 @@ int main(int argc, char *argv[]) {
     //cudaMemcpy(deviceCSRvalues , mat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice)  ;
 
     cudaMemcpy(deviceCSRrow_indx , pinnedMat.row_indx ,(mat.nrows+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice );
-    cudaMemcpy(deviceCSRcol_id , pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice );
-    cudaMemcpy(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice )  ;
+
+
+    cudaMemcpyAsync(deviceCSRcol_id , pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice ,0);
+    cudaMemcpyAsync(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice ,0)  ;
 
     //copy to device
-    cudaMemcpy( dmat_in_device , dmat_in , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
+    cudaMemcpyAsync( dmat_in_device , dmat_in , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice ,0) ;
     //cudaMemcpy( dmat_out_device, dmat_out, mat.nrows * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
 
+    cudaStream_t * stream = new cudaStream_t[count] ;
+
+    for (int i = 0; i < count; i++) {
+      /* code */
+
+      cudaStreamCreate(&stream[i]) ;
+
+      const int start = i * CHUNK_SIZE ;
+      const int end  = min(mat.nrows , (i +1) * CHUNK_SIZE) ;
+
+
+
+      cudaMemcpyAsync(deviceCSRrow_indx + start , pinnedMat.row_indx + start, (end - start +1 )* sizeof(unsigned int) , cudaMemcpyHostToDevice, stream[i]) ;
+
+      dim3 dimGrid( ()( end -start -1 -1)/TILE_WIDTH +1 ) *K, 1 ,  1  ) ;
+
+      dim3 dimBlock(TILE_WIDTH, 1 , 1) ; //
+
+      dev_opt_spmm<<<dimGrid , dimBlock >>>(deviceCSRrow_indx + start, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device + start * K , K , end-start); //
+
+      cudaMemcpyAsync( (dmat_out_GPU + start*K ), (dmat_out_device +start*K ), (end -start  ) * K * sizeof(double) , cudaMemcpyDeviceToHost, stream[i] ) ;
+
+
+    }
+
+    for (int i = 0; i < count; i++) {
+      /* code */
+      cudaStreamSynchronize(stream[i]) ;
+      cudaStreamDestroy(stream[i]);
+    }
 
     //dim3 dimGrid( ceil(K / TILE_WIDTH) , ceil(mat.nrows/TILE_WIDTH) , 1  ) ;
     //dim3 dimGrid( 128,128 , 1) ;
     //dim3 dimBlock(TILE_WIDTH, TILE_WIDTH , 1) ;
 
-    dim3 dimGrid( mat.nrows * K ,1 , 1) ;
+    //dim3 dimGrid( mat.nrows * K ,1 , 1) ; //
     //dim3 dimGrid( MAX_BLOCK ,1 , 1) ;
-    dim3 dimBlock(TILE_WIDTH, 1 , 1) ;
+    //dim3 dimBlock(TILE_WIDTH, 1 , 1) ; //
 
-    int count= (mat.nrows * K )/ MAX_BLOCK;
+    //int count= (mat.nrows * K )/ MAX_BLOCK;
 
 
-    int numberofBlocks= mat.nrows *K;
-    printf("Number of blocks is %d\n", numberofBlocks);
-    printf("Number of count is %d\n", count);
+    //int numberofBlocks= mat.nrows *K;
+    //printf("Number of blocks is %d\n", numberofBlocks);
+    //printf("Number of count is %d\n", count);
 
-    dim3 dimGridlast( numberofBlocks-(MAX_BLOCK * count ),1 , 1) ;
+    //dim3 dimGridlast( numberofBlocks-(MAX_BLOCK * count ),1 , 1) ;
 
-    cudaEventRecord(startEvent, 0);
+    //cudaEventRecord(startEvent, 0);
 
+    //Kurt method
     /*
     for (int i = 0; i < count; i++) {
 
@@ -388,19 +422,18 @@ int main(int argc, char *argv[]) {
       //dev_opt_spmm_2<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows ,  i*MAX_BLOCK);
       dev_opt_spmm<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows ,  i*MAX_BLOCK);
     }
+
     if(numberofBlocks-(MAX_BLOCK * count ) >0)
       dev_opt_spmm<<<dimGridlast , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows ,  count*MAX_BLOCK);
       //dev_opt_spmm_2<<<dimGridlast , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows ,  count*MAX_BLOCK);
 
     //cudaDeviceSynchronize();
     */
-    dev_opt_spmm<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows);
+    //dev_opt_spmm<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows); //
 
     cudaEventRecord(stopEvent, 0) ;
 
-
-
-    cudaMemcpy(dmat_out_GPU , dmat_out_device , mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
+    //cudaMemcpy(dmat_out_GPU , dmat_out_device , mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ; //
 
     cudaEventRecord(stopEventMemKer, 0) ;
 
