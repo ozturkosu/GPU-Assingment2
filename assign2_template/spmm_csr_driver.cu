@@ -306,7 +306,7 @@ int main(int argc, char *argv[]) {
     //float GFLOP = (twoKnnz / (timeKernelCPUfinish-timeKernelCPUstart) )/1000000 ;
     //printf("  GFLOP : %f\n",  GFLOP);
 
-    long_double time_elapsed_ms = 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC;
+    double time_elapsed_ms = 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC;
     std::cout << "CPU time used: " << time_elapsed_ms << " ms\n";
 
     //print_dmat(dmat_out, mat.nrows, K);
