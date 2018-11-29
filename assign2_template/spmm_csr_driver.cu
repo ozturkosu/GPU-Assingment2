@@ -9,12 +9,13 @@
 
 #include "mm_helper.hpp"
 #include "sparse_representation.hpp"
+#include <omp.h>
 #include <iostream>
 #include <cstdlib>
 #include <stdio.h>
 #include <cuda.h>
 #include <stdlib.h>
-#include <omp.h>
+
 
 #define TILE_WIDTH 32
 #define CHUNK_SIZE 100
