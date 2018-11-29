@@ -105,7 +105,7 @@ __global__ void dev_csc_spmm(unsigned int * deviceCSCcol_indx , unsigned int * d
 
       //__syncthreads();
 
-      if ( (row < numberOfColCSC) && (col < K) ) {
+      if ( (col < numberOfColCSC) && (row < K) ) {
 
             //printf(" thread %d , block %d \n",  col , row);
             //__syncthreads();
@@ -114,10 +114,10 @@ __global__ void dev_csc_spmm(unsigned int * deviceCSCcol_indx , unsigned int * d
             int rowId;
 
             // int row_start = A.row_indx[iy] ;
-             unsigned int col_start = deviceCSCcol_indx[row];
+             unsigned int col_start = deviceCSCcol_indx[col];
              //printf(" row_start = %d thread %d , block %d \n", row_start,  col , row);
             // int row_end = A.row_indx[iy + 1] ;
-             unsigned int col_end = deviceCSCcol_indx[row+1] ;
+             unsigned int col_end = deviceCSCcol_indx[col+1] ;
              //printf(" row_end = %d thread %d , block %d \n", row_end,  col , row);
 
 
@@ -129,7 +129,7 @@ __global__ void dev_csc_spmm(unsigned int * deviceCSCcol_indx , unsigned int * d
                   //printf(" rolId = %d thread %d , block %d \n", rowId,  col , row);
 
                   double value = deviceCSCvalues[element] ;
-                  double value2 = dmat_in_device[row * K + col] ;
+                  double value2 = dmat_in_device[col * K + row] ;
 
                   //printf(" value %d  thread %d , block %d \n", value,  col , row);
 
@@ -139,7 +139,7 @@ __global__ void dev_csc_spmm(unsigned int * deviceCSCcol_indx , unsigned int * d
 
                   //Lets try atomic operation
                   sum = value * value2;
-                  atomicAdd(&dmat_out_device[rowId * K + col] ,sum );
+                  atomicAdd(&dmat_out_device[rowId * K + row] ,sum );
                   //printf(" sum =  %d ,thread %d , block %d", sum, col , row);
                   //__syncthreads();
             }
@@ -226,8 +226,8 @@ int main(int argc, char *argv[]) {
     //dim3 dimGrid((K-1) / TILE_WIDTH + 1 , (mat.ncols -1)/TILE_WIDTH +1 , 1  ) ;
     //
     //dim3 dimGrid( (K-1) / TILE_WIDTH +1  , (mat.ncols -1)/TILE_WIDTH+1 , 1  ) ;
-    dim3 dimGrid( (K-1) / TILE_WIDTH +1  , (mat.ncols -1)/TILE_WIDTH+1 , 1  ) ;
-    //dim3 dimGrid(  (mat.ncols -1)/TILE_WIDTH+1 ,  (K-1) / TILE_WIDTH +1 , 1  ) ;
+    //dim3 dimGrid( (K-1) / TILE_WIDTH +1  , (mat.ncols -1)/TILE_WIDTH+1 , 1  ) ;
+    dim3 dimGrid(  (mat.ncols -1)/TILE_WIDTH+1 ,  (K-1) / TILE_WIDTH +1 , 1  ) ;
     dim3 dimBlock(TILE_WIDTH , TILE_WIDTH , 1) ;
 
     cudaEventRecord(startEvent, 0);
