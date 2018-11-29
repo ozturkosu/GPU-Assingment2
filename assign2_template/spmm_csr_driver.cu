@@ -304,7 +304,7 @@ int main(int argc, char *argv[]) {
         //print_CSR(mat);
 
         //cudaMemcpy(dmat_out_GPU , dmat_out_device ,mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
-        cudaMemcpyAsync(dmat_out_GPU + start*K , dmat_out_device +start*K , (start - end +1) * K * sizeof(double) , cudaMemcpyDeviceToHost, stream[i] ) ;
+        cudaMemcpyAsync(dmat_out_GPU + start*K , dmat_out_device +start*K , (start - end ) * K * sizeof(double) , cudaMemcpyDeviceToHost, stream[i] ) ;
 
 
         //cudaEventRecord(stopEventMemKer, 0) ;
