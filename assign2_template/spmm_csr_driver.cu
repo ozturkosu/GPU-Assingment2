@@ -255,9 +255,9 @@ int main(int argc, char *argv[]) {
 
     cudaStream_t * stream = new cudaStream_t[count] ;
 
-    cudaMemcpyAsync(deviceCSRcol_id , pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice ,0);
-    cudaMemcpyAsync(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice , 0)  ;
-    cudaMemcpyAsync( dmat_in_device  , dmat_inPin  , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice , 0 ) ;
+    cudaMemcpy(deviceCSRcol_id , pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice);
+    cudaMemcpy(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice )  ;
+    cudaMemcpy( dmat_in_device  , dmat_in  , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice  ) ;
 
     //cudaStreamCreate(stream0) ;
 
