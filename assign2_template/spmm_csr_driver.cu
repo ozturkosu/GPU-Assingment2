@@ -207,8 +207,8 @@ int main(int argc, char *argv[]) {
     init_dmat(dmat_in, mat.ncols, K,  1.0);
     //print_dmat(dmat_in, mat.ncols, K);
 
-    dmat_inPin =cudaHostAlloc(&dmat_inPin , mat.ncols * K * sizeof(double) ,cudaHostAllocMapped ) ;
-    memcpy(dmat_inPin , dmat_in , mat.ncols * K * sizeof(double)) ;
+    //dmat_inPin =cudaHostAlloc(&dmat_inPin , mat.ncols * K * sizeof(double) ,cudaHostAllocMapped ) ;
+    //memcpy(dmat_inPin , dmat_in , mat.ncols * K * sizeof(double)) ;
 
 
     host_csr_spmm(mat, dmat_in, dmat_out, K);
