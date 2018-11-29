@@ -270,7 +270,6 @@ int main(int argc, char *argv[]) {
         std::cerr << "usage ./exec inputfile K  " << std::endl;
         exit(-1);
     }
-    //const int TILE_WIDTH=32;
 
     unsigned int K = std::atoi(argv[2]);
     CSR mat = read_matrix_market_to_CSR(argv[1]);
@@ -284,23 +283,6 @@ int main(int argc, char *argv[]) {
     /// No need to optimize host;
     host_csr_spmm(mat, dmat_in, dmat_out, K);
 
-
-    /*
-    //Lets implement pinned memory
-    CSR pinnedMat;
-    cudaHostAlloc(&pinnedMat.row_indx , (mat.nrows +1)* sizeof(unsigned int), cudaHostAllocMapped ) ;
-    cudaHostAlloc(&pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaHostAllocMapped) ;
-    cudaHostAlloc(&pinnedMat.values , mat.nnz * sizeof(double), cudaHostAllocMapped) ;
-
-    memcpy(pinnedMat.row_indx , mat.row_indx ,(mat.nrows +1)* sizeof(unsigned int)) ;
-    memcpy(pinnedMat.col_id , mat.col_id ,mat.nnz * sizeof(unsigned int) ) ;
-    memcpy(pinnedMat.values , mat.values ,mat.nnz * sizeof(double)) ;
-
-    pinnedMat.nrows=mat.nrows ;
-    pinnedMat.ncols=mat.ncols ;
-    pinnedMat.nnz = mat.nnz ;
-
-    */
     //Cuda Events
     // events for timing
     cudaEvent_t startEvent, stopEvent;
@@ -325,9 +307,6 @@ int main(int argc, char *argv[]) {
     pinnedMat.nrows=mat.nrows ;
     pinnedMat.ncols=mat.ncols ;
     pinnedMat.nnz = mat.nnz ;
-
-
-
 
     std::cout << mat.nrows << ' ' << mat.ncols << ' ' << mat.nnz << ' ' << K << '\n';
 
@@ -379,15 +358,13 @@ int main(int argc, char *argv[]) {
           const int end  = min(mat.nrows , (i +1) * CHUNK_SIZE) ;
 
           int dif= end-start;
-
-          printf("end -start = %i\n ", dif);
-
-          printf("stream number  = %d\n", i);
+          //printf("end -start = %i\n ", dif);
+          //printf("stream number  = %d\n", i);
 
 
           cudaMemcpyAsync(deviceCSRrow_indx + start , pinnedMat.row_indx + start, (end - start +1 )* sizeof(unsigned int) , cudaMemcpyHostToDevice, stream[i]) ;
 
-          //dim3 dimGrid( ( end -start  ) *K, 1 ,  1  ) ;
+          //dim3 dimGrid( ( end -start  ) *K, 1 ,  1  ) ; //for dev_opt_spmm
 
           dim3 dimGrid( ( end -start  ) +1 , 1 ,  1  ) ;
           dim3 dimBlock(TILE_WIDTH, 1 , 1) ; //
@@ -400,7 +377,6 @@ int main(int argc, char *argv[]) {
     }
 
     for (int i = 0; i < count; i++) {
-      /* code */
       cudaStreamSynchronize(stream[i]) ;
       cudaStreamDestroy(stream[i]);
     }

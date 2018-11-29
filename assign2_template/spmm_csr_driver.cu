@@ -248,49 +248,64 @@ int main(int argc, char *argv[]) {
 
     //cudaStreamCreate(stream0) ;
 
-    //int chunk = mat.nrows / count + 1 ;
-    //printf("chunk = %i\n ", chunk);
-    //timeKernelCPUstart=omp_get_wtime( );
+
+    timeKernelCPUstart=omp_get_wtime( );
     std::clock_t c_start = std::clock();
+
+    float min=10000000000000;
+    float max=0;
+    float average=0;
+    float time=inf;
+
     for (int i = 0; i < count; i++) {
       /* code */
 
         cudaStreamCreate(&stream[i]) ;
 
+        cudaEvent_t startTime, stopTime ;
+        cudaEventCreate(&startTime) ;
+        cudaEventCreate(&stopTime ) ;
+
         const int start = i * CHUNK_SIZE ;
         const int end  = min(mat.nrows , (i +1) * CHUNK_SIZE) ;
 
-        int dif= end-start;
-
         //printf("end -start = %i\n ", dif);
 
+
+        cudaEventRecord(startTime, 0);
         //printf("stream number  = %d\n", i);
         cudaMemcpyAsync(deviceCSRrow_indx + start , pinnedMat.row_indx + start, (end - start +1 )* sizeof(unsigned int) , cudaMemcpyHostToDevice, stream[i]) ;
 
         dim3 dimGrid( ( end -start -1 -1)/TILE_WIDTH +1 , (K-1) / TILE_WIDTH + 1 ,  1  ) ;
         dim3 dimBlock(TILE_WIDTH , TILE_WIDTH , 1) ;
 
-
         dev_csr_spmm<<<dimGrid , dimBlock ,0 , stream[i] >>> ((deviceCSRrow_indx + start), deviceCSRcol_id , deviceCSRvalues  , dmat_in_device   , (dmat_out_device + start * K) , K, end -start) ;
-
-
-        //printf("After Kenel \n");
-
 
         //cudaMemcpy(dmat_out_GPU , dmat_out_device ,mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
         cudaMemcpyAsync( (dmat_out_GPU + start*K ), (dmat_out_device +start*K ), (end -start  ) * K * sizeof(double) , cudaMemcpyDeviceToHost, stream[i] ) ;
 
+        cudaEventRecord(stopTime , 0) ;
+        cudaEventElapsedTime(&time, startTime, stopTime) ;
 
+        if(time > max)
+            max=time;
+
+        if(time < min)
+            min=time;
+
+        average = average + time;
 
     }
 
-    for (int i = 0; i < count; i++) {
-      /* code */
+    for (int i = 0; i < count; i++)
+    {
+
       cudaStreamSynchronize(stream[i]) ;
       cudaStreamDestroy(stream[i]);
     }
-    //timeKernelCPUfinish=omp_get_wtime( );
-    std::clock_t c_end = std::clock();
+    timeKernelCPUfinish=omp_get_wtime( );
+
+    //std::clock_t c_end = std::clock();
     //std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
     //std::cout << "CPU\n";
     //print_dmat(dmat_out, mat.nrows , K);
@@ -303,11 +318,17 @@ int main(int argc, char *argv[]) {
     printf("  2 * K * nnz : %d\n",  twoKnnz);
 
 
-    //float GFLOP = (twoKnnz / (timeKernelCPUfinish-timeKernelCPUstart) )/1000000 ;
-    //printf("  GFLOP : %f\n",  GFLOP);
+    float GFLOP = (twoKnnz / (timeKernelCPUfinish-timeKernelCPUstart) )/1000000000 ;
+    printf("  GFLOP : %f\n",  GFLOP);
 
-    double time_elapsed_ms = 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC;
-    std::cout << "CPU time used: " << time_elapsed_ms<< " ms\n";
+    average=average/count;
+
+    printf("Min Cuda Stream Event : %f\n",  min);
+    printf("Max Cuda Stream Event : %f\n",  max);
+    printf("Max Cuda Stream Event : %f\n",  average);
+
+    //double time_elapsed_ms = 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC;
+    //std::cout << "CPU time used: " << time_elapsed_ms<< " ms\n";
 
     //print_dmat(dmat_out, mat.nrows, K);
 
