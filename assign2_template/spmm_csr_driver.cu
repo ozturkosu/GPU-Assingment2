@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <cuda.h>
 #include <stdlib.h>
+#include <ctime>
 
 
 #define TILE_WIDTH 32
@@ -250,6 +251,7 @@ int main(int argc, char *argv[]) {
     //int chunk = mat.nrows / count + 1 ;
     //printf("chunk = %i\n ", chunk);
     //timeKernelCPUstart=omp_get_wtime( );
+    std::clock_t c_start = std::clock();
     for (int i = 0; i < count; i++) {
       /* code */
 
@@ -288,7 +290,7 @@ int main(int argc, char *argv[]) {
       cudaStreamDestroy(stream[i]);
     }
     //timeKernelCPUfinish=omp_get_wtime( );
-
+    std::clock_t c_end = std::clock();
     //std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
     //std::cout << "CPU\n";
     //print_dmat(dmat_out, mat.nrows , K);
@@ -301,8 +303,11 @@ int main(int argc, char *argv[]) {
     printf("  2 * K * nnz : %d\n",  twoKnnz);
 
 
-    float GFLOP = (twoKnnz / (timeKernelCPUfinish-timeKernelCPUstart) )/1000000 ;
-    printf("  GFLOP : %f\n",  GFLOP);
+    //float GFLOP = (twoKnnz / (timeKernelCPUfinish-timeKernelCPUstart) )/1000000 ;
+    //printf("  GFLOP : %f\n",  GFLOP);
+
+    long_double time_elapsed_ms = 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC;
+    std::cout << "CPU time used: " << time_elapsed_ms << " ms\n";
 
     //print_dmat(dmat_out, mat.nrows, K);
 
