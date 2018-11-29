@@ -254,7 +254,7 @@ int main(int argc, char *argv[]) {
 
     //int chunk = mat.nrows / count + 1 ;
     //printf("chunk = %i\n ", chunk);
-    timeKernelCPU=omp_get_wtime();
+    timeKernelCPUstart=omp_get_wtime();
     for (int i = 0; i < count; i++) {
       /* code */
 
