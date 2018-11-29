@@ -242,7 +242,7 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
                   //printf(" sum =  %d ,thread %d , block %d", sum, col , row);
              }
             //Parallel Reduction
-            __syncthreads();
+            //__syncthreads();
             if(lane < 16) vals[threadIdx.x] += vals[threadIdx.x + 16] ;
             if(lane < 8 ) vals[threadIdx.x] += vals[threadIdx.x + 8] ;
             if(lane < 4 ) vals[threadIdx.x] += vals[threadIdx.x + 4] ;
@@ -431,7 +431,7 @@ int main(int argc, char *argv[]) {
     //std::cout << "CPU\n";
     //print_dmat(dmat_out, mat.nrows , K);
     //std::cout << "GPU\n";
-    print_dmat(dmat_out_GPU,  mat.nrows , K);
+    //print_dmat(dmat_out_GPU,  mat.nrows , K);
 
     float timeforMemKernel;
     cudaEventElapsedTime(&timeforMemKernel, startEventMemKer, stopEventMemKer) ;
