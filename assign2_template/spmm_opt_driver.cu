@@ -82,14 +82,15 @@ void host_csr_spmm(CSR &mat, double * dmat_in, double * dmat_out, unsigned int K
 
 //Emin Code start
 __global__ void dev_opt_spmm_2(unsigned int * deviceCSRrow_indx , unsigned int * deviceCSRcol_id  ,  double * deviceCSRvalues,
-   double * dmat_in_device, double* dmat_out_device ,  int K , unsigned int device_nrows , int kernelId){
+   double * dmat_in_device, double* dmat_out_device ,  int K , unsigned int device_nrows ){
 
      __shared__ double vals[TILE_WIDTH] ;
 
       //int row= blockIdx.y*blockDim.y + threadIdx.y ;
       //const int thread_id_x=blockIdx.x * blockDim.x + threadIdx.x;
       //const int thread_id_y=blockIdx.y * blockDim.y + threadIdx.y;
-        const int thread_id_x=(blockIdx.x + kernelId) * blockDim.x + threadIdx.x;
+
+      const int thread_id_x=blockIdx.x  * blockDim.x + threadIdx.x;
 
       //const int col= blockIdx.x * blockDim.x + threadIdx.x ;
       const int warp_id = thread_id_x /32 ;
@@ -370,26 +371,26 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < count; i++) {
       /* code */
 
-      cudaStreamCreate(&stream[i]) ;
+          cudaStreamCreate(&stream[i]) ;
 
-      const int start = i * CHUNK_SIZE ;
-      const int end  = min(mat.nrows , (i +1) * CHUNK_SIZE) ;
+          const int start = i * CHUNK_SIZE ;
+          const int end  = min(mat.nrows , (i +1) * CHUNK_SIZE) ;
 
-      int dif= end-start;
+          int dif= end-start;
 
-      printf("end -start = %i\n ", dif);
+          printf("end -start = %i\n ", dif);
 
-      printf("stream number  = %d\n", i);
+          printf("stream number  = %d\n", i);
 
 
-      cudaMemcpyAsync(deviceCSRrow_indx + start , pinnedMat.row_indx + start, (end - start +1 )* sizeof(unsigned int) , cudaMemcpyHostToDevice, stream[i]) ;
+          cudaMemcpyAsync(deviceCSRrow_indx + start , pinnedMat.row_indx + start, (end - start +1 )* sizeof(unsigned int) , cudaMemcpyHostToDevice, stream[i]) ;
 
-      dim3 dimGrid( ( end -start  ) *K, 1 ,  1  ) ;
-      dim3 dimBlock(TILE_WIDTH, 1 , 1) ; //
+          dim3 dimGrid( ( end -start  ) *K, 1 ,  1  ) ;
+          dim3 dimBlock(TILE_WIDTH, 1 , 1) ; //
 
-      dev_opt_spmm<<<dimGrid ,  dimBlock , 0, stream[i] >>>(deviceCSRrow_indx + start, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , (dmat_out_device + start * K ), K , end-start); //
+          dev_opt_spmm2<<<dimGrid ,  dimBlock , 0, stream[i] >>>(deviceCSRrow_indx + start, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , (dmat_out_device + start * K ), K , end-start); //
 
-      cudaMemcpyAsync( (dmat_out_GPU + start*K ), (dmat_out_device +start*K ), (end -start  ) * K * sizeof(double) , cudaMemcpyDeviceToHost, stream[i] ) ;
+          cudaMemcpyAsync( (dmat_out_GPU + start*K ), (dmat_out_device +start*K ), (end -start  ) * K * sizeof(double) , cudaMemcpyDeviceToHost, stream[i] ) ;
 
 
     }
