@@ -176,8 +176,8 @@ int main(int argc, char *argv[]) {
 
     //Cuda Events
     // events for timing
-    double timeKernelCPU;
-    double timeKernelCPU;
+    double timeKernelCPUstart;
+    double timeKernelCPUfinish;
 
     cudaEvent_t startEvent, stopEvent;
     cudaEventCreate(&startEvent) ;
@@ -292,7 +292,7 @@ int main(int argc, char *argv[]) {
       cudaStreamSynchronize(stream[i]) ;
       cudaStreamDestroy(stream[i]);
     }
-
+    timeKernelCPUfinish=omp_get_wtime();
 
     //std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
     //std::cout << "CPU\n";
