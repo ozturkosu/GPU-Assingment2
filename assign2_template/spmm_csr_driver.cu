@@ -220,6 +220,7 @@ int main(int argc, char *argv[]) {
     unsigned int* deviceCSRcol_id;
     double* deviceCSRvalues;
 
+    printf("malloc for CPU and GPU\n");
 
     cudaMalloc((void**) &deviceCSRrow_indx ,(mat.nrows +1) * sizeof(unsigned int)) ;
     cudaMemset(deviceCSRrow_indx , 0 ,(mat.nrows +1) * sizeof(unsigned int) ) ;
@@ -261,6 +262,9 @@ int main(int argc, char *argv[]) {
 
     cudaStream_t * stream = new cudaStream_t[count] ;
 
+    printf("transfer from CPU to GPU\n");
+
+
     cudaMemcpy(deviceCSRcol_id , pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice);
     cudaMemcpy(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice )  ;
     cudaMemcpy( dmat_in_device  , dmat_in  , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice  ) ;
@@ -279,7 +283,7 @@ int main(int argc, char *argv[]) {
 
 
 
-        cudaMemcpyAsync(deviceCSRrow_indx + start , pinnedMat.row_indx + start,(start - end +1 )* sizeof(unsigned int) , cudaMemcpyHostToDevice, stream[i]) ;
+        cudaMemcpyAsync(deviceCSRrow_indx + start , pinnedMat.row_indx + start, (end - start +1 )* sizeof(unsigned int) , cudaMemcpyHostToDevice, stream[i]) ;
 
         dim3 dimGrid( ( end -start -1 -1)/TILE_WIDTH +1 , (K-1) / TILE_WIDTH + 1 ,  1  ) ;
         dim3 dimBlock(TILE_WIDTH , TILE_WIDTH , 1) ;
@@ -288,7 +292,7 @@ int main(int argc, char *argv[]) {
         dev_csr_spmm<<<dimGrid , dimBlock ,0 , stream[i] >>> (deviceCSRrow_indx + start, deviceCSRcol_id , deviceCSRvalues  , dmat_in_device   , dmat_out_device + start * K , K, end -start) ;
 
         //cudaMemcpy(dmat_out_GPU , dmat_out_device ,mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
-        cudaMemcpyAsync(dmat_out_GPU + start*K , dmat_out_device +start*K , (start - end ) * K * sizeof(double) , cudaMemcpyDeviceToHost, stream[i] ) ;
+        cudaMemcpyAsync(dmat_out_GPU + start*K , dmat_out_device +start*K , (end -start  ) * K * sizeof(double) , cudaMemcpyDeviceToHost, stream[i] ) ;
 
 
 
