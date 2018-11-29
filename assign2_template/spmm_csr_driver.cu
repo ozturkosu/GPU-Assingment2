@@ -255,7 +255,7 @@ int main(int argc, char *argv[]) {
 
     //int chunk = mat.nrows / count + 1 ;
     //printf("chunk = %i\n ", chunk);
-    timeKernelCPUstart=omp_get_wtime( );
+    //timeKernelCPUstart=omp_get_wtime( );
     for (int i = 0; i < count; i++) {
       /* code */
 
@@ -293,7 +293,7 @@ int main(int argc, char *argv[]) {
       cudaStreamSynchronize(stream[i]) ;
       cudaStreamDestroy(stream[i]);
     }
-    timeKernelCPUfinish=omp_get_wtime( );
+    //timeKernelCPUfinish=omp_get_wtime( );
 
     //std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
     //std::cout << "CPU\n";
