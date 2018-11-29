@@ -281,7 +281,9 @@ int main(int argc, char *argv[]) {
         const int start = i * chunk ;
         const int end  = min(mat.nrows , (i +1) * chunk) ;
 
-        rintf("stream number \n = %d", end - start);
+        int dif= end-start;
+
+        rintf("stream number \n = %d", dif);
 
         printf("stream number \n = %d", i);
         cudaMemcpyAsync(deviceCSRrow_indx + start , pinnedMat.row_indx + start, (end - start +1 )* sizeof(unsigned int) , cudaMemcpyHostToDevice, stream[i]) ;
