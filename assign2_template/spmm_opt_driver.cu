@@ -375,15 +375,17 @@ int main(int argc, char *argv[]) {
       const int start = i * CHUNK_SIZE ;
       const int end  = min(mat.nrows , (i +1) * CHUNK_SIZE) ;
 
+      int dif= end-start;
+
+      //printf("end -start = %i\n ", dif);
 
 
       cudaMemcpyAsync(deviceCSRrow_indx + start , pinnedMat.row_indx + start, (end - start +1 )* sizeof(unsigned int) , cudaMemcpyHostToDevice, stream[i]) ;
 
       dim3 dimGrid( (( end -start -1 -1)/TILE_WIDTH +1 ) *K, 1 ,  1  ) ;
-
       dim3 dimBlock(TILE_WIDTH, 1 , 1) ; //
 
-      dev_opt_spmm<<<dimGrid , dimBlock >>>(deviceCSRrow_indx + start, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device + start * K , K , end-start); //
+      dev_opt_spmm<<<dimGrid , 0, dimBlock , stream[i] >>>(deviceCSRrow_indx + start, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , (dmat_out_device + start * K ), K , end-start); //
 
       cudaMemcpyAsync( (dmat_out_GPU + start*K ), (dmat_out_device +start*K ), (end -start  ) * K * sizeof(double) , cudaMemcpyDeviceToHost, stream[i] ) ;
 
