@@ -207,7 +207,7 @@ int main(int argc, char *argv[]) {
     init_dmat(dmat_in, mat.ncols, K,  1.0);
     //print_dmat(dmat_in, mat.ncols, K);
 
-    dmat_inPin =cudaHostalloc(&dmat_inPin , mat.ncols * K * sizeof(double)) ;
+    dmat_inPin =cudaHostAlloc(&dmat_inPin , mat.ncols * K * sizeof(double)) ;
     memcpy(dmat_inPin , dmat_in , mat.ncols * K * sizeof(double)) ;
 
 
