@@ -271,7 +271,7 @@ int main(int argc, char *argv[]) {
 
         int end;
 
-        if(mat.nrows < (i +1) * CHUNK_SIZE))
+        if(mat.nrows < (i +1) * CHUNK_SIZE)
             end = mat.nrows;
         else
             end = (i +1) * CHUNK_SIZE ;
