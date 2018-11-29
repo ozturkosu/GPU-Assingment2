@@ -283,7 +283,7 @@ int main(int argc, char *argv[]) {
 
         int dif= end-start;
 
-        rintf("stream number \n = %d", dif);
+        printf("stream number \n = %d", dif);
 
         printf("stream number \n = %d", i);
         cudaMemcpyAsync(deviceCSRrow_indx + start , pinnedMat.row_indx + start, (end - start +1 )* sizeof(unsigned int) , cudaMemcpyHostToDevice, stream[i]) ;
