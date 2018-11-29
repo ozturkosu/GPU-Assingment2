@@ -260,15 +260,15 @@ int main(int argc, char *argv[]) {
 
     //cudaStreamCreate(stream0) ;
 
-
+    int chunk = mat.nrows / count + 1 ;
 
     for (int i = 0; i < count; i++) {
       /* code */
 
         cudaStreamCreate(&stream[i]) ;
 
-        const int start = i * CHUNK_SIZE ;
-        const int end  = min(mat.nrows , (i +1) *CHUNK_SIZE) ;
+        const int start = i * chunk ;
+        const int end  = min(mat.nrows , (i +1) * chunk) ;
 
         //Initialize the Grid and Block Dimension
 
