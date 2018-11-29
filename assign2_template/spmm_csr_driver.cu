@@ -253,7 +253,7 @@ int main(int argc, char *argv[]) {
     cudaMemcpyAsync(deviceCSRcol_id , pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice , stream0);
     cudaMemcpyAsync(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice , stream0 )  ;
     cudaMemcpyAsync( dmat_in_device , dmat_in , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice , stream0 ) ;
-
+      cudaStreamSynchronize(stream0);
 
     for (int i = 0; i < count; i++) {
       /* code */
@@ -344,6 +344,7 @@ int main(int argc, char *argv[]) {
     cudaFreeHost(pinnedMat.values) ;
 
     delete [] stream;
+    delete stream0 ;
 
     //cudaFree(device_nrows) ;
     //cudaFree(device_ncols) ;
