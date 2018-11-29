@@ -9,8 +9,8 @@
 
 #include "mm_helper.hpp"
 #include "sparse_representation.hpp"
-#include <omp.h>
 #include <iostream>
+#include <omp.h>
 #include <cstdlib>
 #include <stdio.h>
 #include <cuda.h>
@@ -20,12 +20,6 @@
 #define TILE_WIDTH 32
 #define CHUNK_SIZE 100
 
-/*
-#define min(a,b) \
-   ({ __typeof__ (a) _a = (a); \
-       __typeof__ (b) _b = (b); \
-     _a < _b ? _a : _b; })
-*/
 
 void check_dmat(double* a, double *b,  int n,  int K, bool quit_on_err = true ) {
     for ( int i = 0; i < n; ++i) {
