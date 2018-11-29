@@ -331,7 +331,7 @@ int main(int argc, char *argv[]) {
 
     printf("Min Cuda Stream Event : %f\n",  min);
     printf("Max Cuda Stream Event : %f\n",  max);
-    printf("Max Cuda Stream Event : %f\n",  average);
+    printf("Average Cuda Stream Event : %f\n",  average);
 
     //double time_elapsed_ms = 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC;
     //std::cout << "CPU time used: " << time_elapsed_ms<< " ms\n";

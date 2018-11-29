@@ -207,6 +207,9 @@ int main(int argc, char *argv[]) {
     cudaEventRecord(startEventMemKer, 0);
 
 
+
+
+
     cudaMemcpy(deviceCSCcol_indx , mat.col_indx ,  (mat.ncols+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
     cudaMemcpy(deviceCSCrow_id, mat.row_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
     cudaMemcpy(deviceCSCvalues , mat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice) ;
