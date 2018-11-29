@@ -198,11 +198,18 @@ int main(int argc, char *argv[]) {
     std::cout << mat.nrows << ' ' << mat.ncols << ' ' << mat.nnz << ' ' << K << '\n';
 
     double *dmat_in = (double*)malloc(mat.ncols * K  * sizeof(double));
+
+    double *dmat_inPin;
+
     double *dmat_out = (double*)malloc(mat.nrows * K * sizeof(double));
     double *dmat_out_GPU = (double*)malloc(mat.nrows * K * sizeof(double));
 
     init_dmat(dmat_in, mat.ncols, K,  1.0);
     //print_dmat(dmat_in, mat.ncols, K);
+
+    dmat_inPin =cudaHostalloc(&dmat_inPin , mat.ncols * K * sizeof(double)) ;
+    memcpy(dmat_inPin , dmat_in , mat.ncols * K * sizeof(double)) ;
+
 
     host_csr_spmm(mat, dmat_in, dmat_out, K);
 
@@ -220,6 +227,8 @@ int main(int argc, char *argv[]) {
 
     double *dmat_in_device ;
     cudaMalloc((void**) &dmat_in_device , mat.ncols * K * sizeof(double)) ;
+
+
 
     double *dmat_out_device ;
     cudaMalloc((void**) &dmat_out_device, mat.nrows * K * sizeof(double)) ;
@@ -242,13 +251,13 @@ int main(int argc, char *argv[]) {
     */
 
 
-    const int count = (mat.nrows ) / CHUNK_SIZE +1 ;
+    const int count = (mat.nrows-1 ) / CHUNK_SIZE +1 ;
 
     cudaStream_t * stream = new cudaStream_t[count] ;
 
     cudaMemcpyAsync(deviceCSRcol_id , pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice ,0);
     cudaMemcpyAsync(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice , 0)  ;
-    cudaMemcpyAsync( dmat_in_device  , dmat_in  , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice , 0 ) ;
+    cudaMemcpyAsync( dmat_in_device  , dmat_inPin  , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice , 0 ) ;
 
     //cudaStreamCreate(stream0) ;
 
