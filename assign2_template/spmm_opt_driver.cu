@@ -446,11 +446,11 @@ int main(int argc, char *argv[]) {
     cudaEventSynchronize(stopEventMemKer);
 
 
-    std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
-    std::cout << "CPU\n";
-    print_dmat(dmat_out, mat.nrows , K);
-    std::cout << "GPU\n";
-    print_dmat(dmat_out_GPU,  mat.nrows , K);
+    //std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
+    //std::cout << "CPU\n";
+    //print_dmat(dmat_out, mat.nrows , K);
+    //std::cout << "GPU\n";
+    //print_dmat(dmat_out_GPU,  mat.nrows , K);
 
     float timeforMemKernel;
     cudaEventElapsedTime(&timeforMemKernel, startEventMemKer, stopEventMemKer) ;
