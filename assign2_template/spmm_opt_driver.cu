@@ -385,7 +385,7 @@ int main(int argc, char *argv[]) {
       dim3 dimGrid( (( end -start -1 -1)/TILE_WIDTH +1 ) *K, 1 ,  1  ) ;
       dim3 dimBlock(TILE_WIDTH, 1 , 1) ; //
 
-      dev_opt_spmm<<<dimGrid , 0, dimBlock , stream[i] >>>(deviceCSRrow_indx + start, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , (dmat_out_device + start * K ), K , end-start); //
+      dev_opt_spmm<<<dimGrid ,  dimBlock , 0, stream[i] >>>(deviceCSRrow_indx + start, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , (dmat_out_device + start * K ), K , end-start); //
 
       cudaMemcpyAsync( (dmat_out_GPU + start*K ), (dmat_out_device +start*K ), (end -start  ) * K * sizeof(double) , cudaMemcpyDeviceToHost, stream[i] ) ;
 
