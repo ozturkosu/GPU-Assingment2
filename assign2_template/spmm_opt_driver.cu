@@ -123,8 +123,9 @@ __global__ void dev_opt_spmm_2(unsigned int * deviceCSRrow_indx , unsigned int *
                  //printf(" row_end = %d thread %d , block %d \n", row_end,  col , row);
 
                  //dmat_out_device[row * K + col] =0;
-
+                 __syncthreads();
                  vals[threadIdx.x] = 0 ;
+                    __syncthreads();
 
                  for ( int element = row_start + lane ; element < row_end; element+=32) {
                       /* code */
@@ -156,7 +157,7 @@ __global__ void dev_opt_spmm_2(unsigned int * deviceCSRrow_indx , unsigned int *
                 //__syncthreads();
                 //dmat_out[ix][iy] = sum ;
                 //printf(" sum = %d thread %d , block %d \n", sum,  col , row);
-
+                __syncthreads();
                 if(lane == 0)
                   atomicAdd(&dmat_out_device[irow * K + icol] , vals[threadIdx.x]) ;
                 //printf("dvice matrix %d\n", dmat_out_device[row * K + col] );
