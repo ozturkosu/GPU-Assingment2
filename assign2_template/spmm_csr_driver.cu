@@ -287,7 +287,7 @@ int main(int argc, char *argv[]) {
         //cudaStreamCreate(&stream0) ;
 
 
-        dev_csr_spmm<<<dimGrid , dimBlock ,0 , stream[i] >>>(deviceCSRrow_indx + start, deviceCSRcol_id + start, deviceCSRvalues + start , dmat_in_device + start * K  , dmat_out_device + start * K , end -start) ;
+        dev_csr_spmm<<<dimGrid , dimBlock ,0 , stream[i] >>>(deviceCSRrow_indx + start, deviceCSRcol_id + start, deviceCSRvalues + start , dmat_in_device + start * K  , dmat_out_device + start * K , K, end -start) ;
 
         //cudaEventRecord(stopEvent, 0) ;
         //cudaEventSynchronize(stopEvent);
