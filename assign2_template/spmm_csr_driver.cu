@@ -257,8 +257,8 @@ int main(int argc, char *argv[]) {
 
 
     //const int count = (mat.nrows-1 ) / CHUNK_SIZE +1 ;
-    const int streamSize =200;
-    int count = streamSize ;
+    //const int streamSize =200;
+    int count = (mat.nrows- 1) / CHUNK_SIZE + 1;
 
     cudaStream_t * stream = new cudaStream_t[count] ;
 
@@ -271,7 +271,7 @@ int main(int argc, char *argv[]) {
 
     //cudaStreamCreate(stream0) ;
 
-    int chunk = mat.nrows / count + 1 ;
+    //int chunk = mat.nrows / count + 1 ;
     printf("chunk = %i\n ", chunk);
 
     for (int i = 0; i < count; i++) {
@@ -279,8 +279,8 @@ int main(int argc, char *argv[]) {
 
         cudaStreamCreate(&stream[i]) ;
 
-        const int start = i * chunk ;
-        const int end  = min(mat.nrows , (i +1) * chunk) ;
+        const int start = i * CHUNK_SIZE ;
+        const int end  = min(mat.nrows , (i +1) * CHUNK_SIZE) ;
 
         int dif= end-start;
 
