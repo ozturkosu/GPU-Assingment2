@@ -222,7 +222,7 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
 
              vals[threadIdx.x] = 0 ;
 
-             for ( int element = row_start + lane ; element < row_end; element+=32) {
+             for ( unsigned int element = row_start + lane ; element < row_end; element+=32) {
                   /* code */
 
                   //colId= A.col_id[i] ;
