@@ -244,6 +244,8 @@ int main(int argc, char *argv[]) {
 
     const int count = (mat.nrows ) / CHUNK_SIZE +1 ;
 
+    cudaStream_t * stream = new cudaStream_t[count] ;
+
     cudaMemcpyAsync(deviceCSRcol_id , pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice ,0);
     cudaMemcpyAsync(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice , 0)  ;
     cudaMemcpyAsync( dmat_in_device  , dmat_in  , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice , 0 ) ;
