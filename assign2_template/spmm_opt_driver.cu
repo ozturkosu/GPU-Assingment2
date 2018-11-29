@@ -243,11 +243,28 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
              }
             //Parallel Reduction
             //__syncthreads();
-            if(lane < 16) vals[threadIdx.x] += vals[threadIdx.x + 16] ;
-            if(lane < 8 ) vals[threadIdx.x] += vals[threadIdx.x + 8] ;
-            if(lane < 4 ) vals[threadIdx.x] += vals[threadIdx.x + 4] ;
-            if(lane < 2 ) vals[threadIdx.x] += vals[threadIdx.x + 2 ] ;
-            if(lane < 1 ) vals[threadIdx.x] += vals[threadIdx.x + 1 ] ;
+            /*
+            if(lane < 16)
+                vals[threadIdx.x] += vals[threadIdx.x + 16] ;
+            if(lane < 8 )
+                vals[threadIdx.x] += vals[threadIdx.x + 8] ;
+            if(lane < 4 )
+                vals[threadIdx.x] += vals[threadIdx.x + 4] ;
+            if(lane < 2 )
+                vals[threadIdx.x] += vals[threadIdx.x + 2 ] ;
+            if(lane < 1 )
+                vals[threadIdx.x] += vals[threadIdx.x + 1 ] ;
+              */
+               if(lane < 16)
+                    atomicAdd(&vals[threadIdx.x] , vals[threadIdx.x + 16]) ;
+                if(lane < 8 )
+                    atomicAdd(&vals[threadIdx.x] , vals[threadIdx.x + 8]) ;
+                if(lane < 4 )
+                    atomicAdd(&vals[threadIdx.x] , vals[threadIdx.x + 4]) ;
+                if(lane < 2 )
+                    atomicAdd(&vals[threadIdx.x] , vals[threadIdx.x + 2]) ;
+                if(lane < 1 )
+                    atomicAdd(&vals[threadIdx.x] , vals[threadIdx.x + 1]) ;
 
             //for (int d = 32 >> 1; d >= 1; d >>=1 ) {
             //  if(lane < d) vals[threadIdx.x] += vals[threadIdx.x + d] ;
