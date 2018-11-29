@@ -16,6 +16,7 @@
 #include <stdlib.h>
 
 #define TILE_WIDTH 32
+#define CHUNK_SIZE 100
 
 void check_dmat(double* a, double *b,  int n,  int K, bool quit_on_err = true ) {
     for ( int i = 0; i < n; ++i) {
@@ -231,60 +232,86 @@ int main(int argc, char *argv[]) {
     //cudaMemcpy(deviceCSRcol_id, mat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
     //cudaMemcpy(deviceCSRvalues , mat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice) ;
 
-    cudaEventRecord(startEventMemKer, 0);
+    //cudaEventRecord(startEventMemKer, 0);
 
 
-    //cudaStream_t stream;
-
-    //cudaMemcpy(deviceCSRrow_indx , pinnedMat.row_indx ,(mat.nrows+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice) ;
-    //cudaMemcpy(deviceCSRcol_id , pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice ) ;
-    //cudaMemcpy(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice)  ;
-
-    //copy to device
-    //cudaMemcpy( dmat_in_device , dmat_in , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
-    //cudaMemcpy( dmat_out_device, dmat_out, mat.nrows * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
-
+    /*
     cudaMemcpy(deviceCSRrow_indx , pinnedMat.row_indx ,(mat.nrows+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice );
     cudaMemcpy(deviceCSRcol_id , pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice );
     cudaMemcpy(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice )  ;
     cudaMemcpy( dmat_in_device , dmat_in , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice ) ;
 
-
-    //Initialize the Grid and Block Dimension
-
-    //dim3 dimGrid( (K-1) / TILE_WIDTH + 1 , ( mat.nrows-1)/TILE_WIDTH +1 , 1  ) ;
-    dim3 dimGrid( ( mat.nrows-1)/TILE_WIDTH +1 , (K-1) / TILE_WIDTH + 1 ,  1  ) ;
-    dim3 dimBlock(TILE_WIDTH , TILE_WIDTH , 1) ;
-
-    cudaEventRecord(startEvent, 0);
-
-    dev_csr_spmm<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows) ;
-
-    cudaEventRecord(stopEvent, 0) ;
-    cudaEventSynchronize(stopEvent);
-
-    float timeforKernel;
-    cudaEventElapsedTime(&timeforKernel, startEvent, stopEvent) ;
-
-    printf("  Time for Kernel : %f\n",  timeforKernel);
-
-    //cudaDeviceSynchronize() ;
-    //std::cout << "GPU out matrix before kernel\n";
-    //print_dmat(dmat_out_GPU,  mat.nrows , K);
-
-    //print_CSR(mat);
-
-    cudaMemcpy(dmat_out_GPU , dmat_out_device ,mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
+    */
 
 
-    cudaEventRecord(stopEventMemKer, 0) ;
+    const int count = (mat.nrows -1 ) / CHUNK_SIZE +1 ;
+    cudaStream_t * stream = new cudaStream_t[count] ;
 
-    cudaEventSynchronize(startEventMemKer);
-    cudaEventSynchronize(stopEventMemKer);
+    for (int k = 0; k < count; k++) {
+        cudaStreamCreate(&streams[k]) ;
 
-    float timeforMemKernel;
-    cudaEventElapsedTime(&timeforMemKernel, startEventMemKer, stopEventMemKer) ;
-    printf("  Time for Mem Cpy and Kernel : %f\n",  timeforMemKernel);
+    }
+
+    cudaMemcpyAsync(deviceCSRrow_indx , pinnedMat.row_indx ,(mat.nrows+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice, stream[0]) ;
+    cudaMemcpyAsync(deviceCSRcol_id , pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice , stream[0]);
+    cudaMemcpyAsync(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice , stream[0] )  ;
+    cudaMemcpyAsync( dmat_in_device , dmat_in , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice , stream[0] ) ;
+
+     cudaStreamSynchronize(stream[0]);
+
+    for (int i = 0; i < count; i++) {
+      /* code */
+
+        const int start = i * CHUNK_SIZE ;
+        const int end  = min(mat.nrwos , (i +1) *CHUNK_SIZE) ;
+
+        //Initialize the Grid and Block Dimension
+
+        //dim3 dimGrid( (K-1) / TILE_WIDTH + 1 , ( mat.nrows-1)/TILE_WIDTH +1 , 1  ) ;
+        dim3 dimGrid( ( mat.nrows-1)/TILE_WIDTH +1 , (K-1) / TILE_WIDTH + 1 ,  1  ) ;
+        dim3 dimBlock(TILE_WIDTH , TILE_WIDTH , 1) ;
+
+        //cudaEventRecord(startEvent, 0);
+        //cudaStreamCreate(&streams[i]) ;
+
+
+        dev_csr_spmm<<<dimGrid , dimBlock ,0 , stream[i] >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows) ;
+
+        //cudaEventRecord(stopEvent, 0) ;
+        //cudaEventSynchronize(stopEvent);
+
+        //float timeforKernel;
+        //cudaEventElapsedTime(&timeforKernel, startEvent, stopEvent) ;
+
+        //printf("  Time for Kernel : %f\n",  timeforKernel);
+
+        //cudaDeviceSynchronize() ;
+        //std::cout << "GPU out matrix before kernel\n";
+        //print_dmat(dmat_out_GPU,  mat.nrows , K);
+
+        //print_CSR(mat);
+
+        //cudaMemcpy(dmat_out_GPU , dmat_out_device ,mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
+        cudaMemcpyAsync(dmat_out_GPU , dmat_out_device ,mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost, stream[i] ) ;
+
+
+        //cudaEventRecord(stopEventMemKer, 0) ;
+
+        //cudaEventSynchronize(startEventMemKer);
+        //cudaEventSynchronize(stopEventMemKer);
+
+        //float timeforMemKernel;
+        //cudaEventElapsedTime(&timeforMemKernel, startEventMemKer, stopEventMemKer) ;
+        //printf("  Time for Mem Cpy and Kernel : %f\n",  timeforMemKernel);
+
+    }
+
+    for (int i = 0; i < count; i++) {
+      /* code */
+      cudaStreamSynchronize(stream[i]) ;
+      cduaStreamDestroy(stream[i]);
+    }
+
 
     //std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
     //std::cout << "CPU\n";
@@ -315,6 +342,8 @@ int main(int argc, char *argv[]) {
     cudaFreeHost(pinnedMat.row_indx);
     cudaFreeHost(pinnedMat.col_id) ;
     cudaFreeHost(pinnedMat.values) ;
+
+    delete stream;
 
     //cudaFree(device_nrows) ;
     //cudaFree(device_ncols) ;
