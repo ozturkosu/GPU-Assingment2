@@ -282,17 +282,17 @@ int main(int argc, char *argv[]) {
         const int end  = min(mat.nrows , (i +1) * chunk) ;
 
 
-
+        printf("stream number \n = %d", i);
         cudaMemcpyAsync(deviceCSRrow_indx + start , pinnedMat.row_indx + start, (end - start +1 )* sizeof(unsigned int) , cudaMemcpyHostToDevice, stream[i]) ;
 
         dim3 dimGrid( ( end -start -1 -1)/TILE_WIDTH +1 , (K-1) / TILE_WIDTH + 1 ,  1  ) ;
         dim3 dimBlock(TILE_WIDTH , TILE_WIDTH , 1) ;
 
 
-        dev_csr_spmm<<<dimGrid , dimBlock ,0 , stream[i] >>> (deviceCSRrow_indx + start, deviceCSRcol_id , deviceCSRvalues  , dmat_in_device   , dmat_out_device + start * K , K, end -start) ;
+        dev_csr_spmm<<<dimGrid , dimBlock ,0 , stream[i] >>> ((deviceCSRrow_indx + start), deviceCSRcol_id , deviceCSRvalues  , dmat_in_device   , (dmat_out_device + start * K) , K, end -start) ;
 
         //cudaMemcpy(dmat_out_GPU , dmat_out_device ,mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
-        cudaMemcpyAsync(dmat_out_GPU + start*K , dmat_out_device +start*K , (end -start  ) * K * sizeof(double) , cudaMemcpyDeviceToHost, stream[i] ) ;
+        cudaMemcpyAsync( (dmat_out_GPU + start*K ), (dmat_out_device +start*K ), (end -start  ) * K * sizeof(double) , cudaMemcpyDeviceToHost, stream[i] ) ;
 
 
 
