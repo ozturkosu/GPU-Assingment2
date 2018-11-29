@@ -199,7 +199,7 @@ int main(int argc, char *argv[]) {
 
     double *dmat_in = (double*)malloc(mat.ncols * K  * sizeof(double));
 
-    double *dmat_inPin;
+    //double *dmat_inPin;
 
     double *dmat_out = (double*)malloc(mat.nrows * K * sizeof(double));
     double *dmat_out_GPU = (double*)malloc(mat.nrows * K * sizeof(double));
@@ -222,6 +222,8 @@ int main(int argc, char *argv[]) {
 
 
     cudaMalloc((void**) &deviceCSRrow_indx ,(mat.nrows +1) * sizeof(unsigned int)) ;
+    cudaMemset(deviceCSRrow_indx , 0 ,(mat.nrows +1) * sizeof(unsigned int) ) ;
+
     cudaMalloc((void**) &deviceCSRcol_id , mat.nnz * sizeof(unsigned int)) ;
     cudaMalloc((void**) &deviceCSRvalues , mat.nnz * sizeof(double)) ;
 
@@ -232,6 +234,8 @@ int main(int argc, char *argv[]) {
 
     double *dmat_out_device ;
     cudaMalloc((void**) &dmat_out_device, mat.nrows * K * sizeof(double)) ;
+
+    cudaMemset(dmat_out_device , 0 , mat.nrows * K * sizeof(double)) ;
 
     //We want to use pinned memory
 
@@ -288,7 +292,7 @@ int main(int argc, char *argv[]) {
         dim3 dimBlock(TILE_WIDTH , TILE_WIDTH , 1) ;
 
 
-        dev_csr_spmm<<<dimGrid , dimBlock ,0 , stream[i] >>> (deviceCSRrow_indx + start, deviceCSRcol_id + start, deviceCSRvalues + start , dmat_in_device + start * K  , dmat_out_device + start * K , K, end -start) ;
+        dev_csr_spmm<<<dimGrid , dimBlock ,0 , stream[i] >>> (deviceCSRrow_indx + start, deviceCSRcol_id , deviceCSRvalues  , dmat_in_device   , dmat_out_device + start * K , K, end -start) ;
 
         //cudaEventRecord(stopEvent, 0) ;
         //cudaEventSynchronize(stopEvent);
