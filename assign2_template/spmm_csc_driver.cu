@@ -91,19 +91,11 @@ __global__ void dev_csc_spmm(unsigned int * deviceCSCcol_indx , unsigned int * d
 
       const int row=blockIdx.y * blockDim.y + threadIdx.y;
       const int col= blockIdx.x * blockDim.x + threadIdx.x ;
-      //const int col=blockIdx.y * blockDim.y + threadIdx.y ;
-      //const int row= blockIdx.x * blockDim.x + threadIdx.x ;
+
 
 
       unsigned int numberOfColCSC = device_ncols ;
 
-      //const int row = blockIdx.x * blockDim.x + threadIdx.x ;
-      //printf(" Rows = %d thread %d , block %d \n", numberOfRowCSR,  col , row);
-
-      //if(row < device_nrows && col < K)
-      //      dmat_out_device[row * K + col] =0;
-
-      //__syncthreads();
 
       if ( (col < numberOfColCSC) && (row < K) ) {
 
@@ -131,11 +123,6 @@ __global__ void dev_csc_spmm(unsigned int * deviceCSCcol_indx , unsigned int * d
                   double value = deviceCSCvalues[element] ;
                   double value2 = dmat_in_device[col * K + row] ;
 
-                  //printf(" value %d  thread %d , block %d \n", value,  col , row);
-
-                  //sum = sum +  value * value2 ;
-
-                  //dmat_out_device[rowId * K + col] = dmat_out_device[rowId * K + col] + value * value2;
 
                   //Lets try atomic operation
                   sum = value * value2;
@@ -143,11 +130,7 @@ __global__ void dev_csc_spmm(unsigned int * deviceCSCcol_indx , unsigned int * d
                   //printf(" sum =  %d ,thread %d , block %d", sum, col , row);
                   //__syncthreads();
             }
-            //__synctreads();
-            //dmat_out[ix][iy] = sum ;
-            //printf(" sum = %d thread %d , block %d \n", sum,  col , row);
 
-            //printf("dvice matrix %d\n", dmat_out_device[row * K + col] );
       }
 
 }

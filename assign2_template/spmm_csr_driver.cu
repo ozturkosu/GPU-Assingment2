@@ -338,7 +338,7 @@ int main(int argc, char *argv[]) {
     //double time_elapsed_ms = 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC;
     //std::cout << "CPU time used: " << time_elapsed_ms<< " ms\n";
 
-    //print_dmat(dmat_out, mat.nrows, K);
+  
 
 
     free(mat.row_indx);

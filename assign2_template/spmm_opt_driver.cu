@@ -339,7 +339,7 @@ int main(int argc, char *argv[]) {
     timeKernelCPUstart=omp_get_wtime( );
 
     for (int i = 0; i < count; i++) {
-      /* code */
+    
 
           cudaStreamCreate(&stream[i]) ;
 
