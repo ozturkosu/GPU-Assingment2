@@ -246,22 +246,21 @@ int main(int argc, char *argv[]) {
 
     const int count = (mat.nrows -1 ) / CHUNK_SIZE +1 ;
     cudaStream_t * stream = new cudaStream_t[count] ;
+    cudaStream_t stream0 ;
 
 
+    cudaStreamCreate(stream0) ;
 
-      cudaStreamCreate(&stream[0]) ;
+    cudaMemcpyAsync(deviceCSRrow_indx , pinnedMat.row_indx ,(mat.nrows+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice, stream0) ;
+    cudaMemcpyAsync(deviceCSRcol_id , pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice , stream0);
+    cudaMemcpyAsync(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice , stream0 )  ;
+    cudaMemcpyAsync( dmat_in_device , dmat_in , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice , stream0 ) ;
 
-    cudaMemcpyAsync(deviceCSRrow_indx , pinnedMat.row_indx ,(mat.nrows+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice, stream[0]) ;
-    cudaMemcpyAsync(deviceCSRcol_id , pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice , stream[0]);
-    cudaMemcpyAsync(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice , stream[0] )  ;
-    cudaMemcpyAsync( dmat_in_device , dmat_in , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice , stream[0] ) ;
 
-     cudaStreamSynchronize(stream[0]);
-
-    for (int i = 1; i <= count; i++) {
+    for (int i = 0; i < count; i++) {
       /* code */
 
-          cudaStreamCreate(&stream[i]) ;
+        cudaStreamCreate(&stream[i]) ;
 
         const int start = i * CHUNK_SIZE ;
         const int end  = min(mat.nrows , (i +1) *CHUNK_SIZE) ;
