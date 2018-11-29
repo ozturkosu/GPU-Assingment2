@@ -114,11 +114,11 @@ __global__ void dev_opt_spmm_2(unsigned int * deviceCSRrow_indx , unsigned int *
                 //printf(" icol %d , irow %d \n",  icol , irow);
 
                 int colId;
+                double sum=0;
 
                 // int row_start = A.row_indx[iy] ;
                  unsigned int row_start = deviceCSRrow_indx[irow];
-                 //printf(" row_start = %d thread %d , block %d \n", row_start,  col , row);
-                // int row_end = A.row_indx[iy + 1] ;
+
                  unsigned int row_end = deviceCSRrow_indx[irow+1] ;
                  //printf(" row_end = %d thread %d , block %d \n", row_end,  col , row);
 
@@ -140,6 +140,7 @@ __global__ void dev_opt_spmm_2(unsigned int * deviceCSRrow_indx , unsigned int *
                       //printf(" colId = %d thread %d , block %d \n", colId,  threadIdx.x , irow);
 
                       //vals[threadIdx.x] += value + value2 ;
+                        sum=value * value2
                         atomicAdd(&vals[threadIdx.x] ,value * value2 );
 
                       //printf(" sum =  %d ,thread %d , block %d", sum, col , row);
