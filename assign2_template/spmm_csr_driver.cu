@@ -319,7 +319,7 @@ int main(int argc, char *argv[]) {
     //print_dmat(dmat_out, mat.nrows , K);
     //std::cout << "GPU\n";
     //print_dmat(dmat_out_GPU,  mat.nrows , K);
-    //check_dmat(dmat_out, dmat_out_GPU, mat.nrows, K);
+    check_dmat(dmat_out, dmat_out_GPU, mat.nrows, K);
 
     //Lets compute GFLOP
     unsigned int twoKnnz= 2 * K * mat.nnz ;

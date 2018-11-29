@@ -147,12 +147,16 @@ __global__ void dev_opt_spmm_2(unsigned int * deviceCSRrow_indx , unsigned int *
                  }
                 //Parallel Reduction
                 __syncthreads();
-                if(lane < 16) vals[threadIdx.x] += vals[threadIdx.x + 16] ;
-                if(lane < 8 ) vals[threadIdx.x] += vals[threadIdx.x + 8] ;
-                if(lane < 4 ) vals[threadIdx.x] += vals[threadIdx.x + 4] ;
-                if(lane < 2 ) vals[threadIdx.x] += vals[threadIdx.x + 2 ] ;
-                if(lane < 1 ) vals[threadIdx.x] += vals[threadIdx.x + 1 ] ;
-
+                if(lane < 16)
+                     atomicAdd(&vals[threadIdx.x] , vals[threadIdx.x + 16]) ;
+                 if(lane < 8 )
+                     atomicAdd(&vals[threadIdx.x] , vals[threadIdx.x + 8]) ;
+                 if(lane < 4 )
+                     atomicAdd(&vals[threadIdx.x] , vals[threadIdx.x + 4]) ;
+                 if(lane < 2 )
+                     atomicAdd(&vals[threadIdx.x] , vals[threadIdx.x + 2]) ;
+                 if(lane < 1 )
+                     atomicAdd(&vals[threadIdx.x] , vals[threadIdx.x + 1]) ;
 
 
                 //__syncthreads();
@@ -175,42 +179,21 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
 
       //int row= blockIdx.y*blockDim.y + threadIdx.y ;
       const int thread_id_x=blockIdx.x * blockDim.x + threadIdx.x;
-      //const int thread_id_y=blockIdx.y * blockDim.y + threadIdx.y;
 
-      //const int thread_id_x=(blockIdx.x + kernelId) * blockDim.x + threadIdx.x;
-      //const int thread_id_y=blockIdx.y * blockDim.y + threadIdx.y;
-
-
-
-
-      //const int col= blockIdx.x * blockDim.x + threadIdx.x ;
       const int warp_id = thread_id_x /32 ;
 
       const int irow= warp_id / K ;
       const int icol= warp_id & (K-1) ;
 
-      //const int warp_idx = blockIdx.x;
-      //const int warp_idy = blockIdx.y*blockDim.y + threadIdx.y;
 
-      //const int irow = warp_idy /2;
-      //const int icol = warp_idx % K;
-
-      //const int warpId= 128 * blockIdx.y + blockIdx.x * 32 + threadIdx.y;
-
-      //const int irow = warpId /K ;
-      //const int icol= warpId % K;
 
       int lane = thread_id_x & (31) ;
 
 
       unsigned int numberOfRowCSR = device_nrows ;
 
-      //const int row = blockIdx.x * blockDim.x + threadIdx.x ;
-      //printf(" Rows = %d thread %d , block %d \n", numberOfRowCSR,  col , row);
-
       if ( irow < numberOfRowCSR && icol < K) {
 
-            //printf(" icol %d , irow %d \n",  icol , irow);
 
             int colId;
 
@@ -219,9 +202,6 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
              //printf(" row_start = %d thread %d , block %d \n", row_start,  col , row);
             // int row_end = A.row_indx[iy + 1] ;
              unsigned int row_end = deviceCSRrow_indx[irow+1] ;
-             //printf(" row_end = %d thread %d , block %d \n", row_end,  col , row);
-
-             //dmat_out_device[row * K + col] =0;
 
              vals[threadIdx.x] = 0 ;
 
@@ -235,47 +215,26 @@ __global__ void dev_opt_spmm(unsigned int * deviceCSRrow_indx , unsigned int * d
                   double value = deviceCSRvalues[element] ;
                   double value2 = dmat_in_device[colId * K + icol] ;
 
-                  //printf(" colId = %d thread %d , block %d \n", colId,  threadIdx.x , irow);
 
-                  //vals[threadIdx.x] += value + value2 ;
                   atomicAdd(&vals[threadIdx.x] ,value * value2 );
                   //printf(" sum =  %d ,thread %d , block %d", sum, col , row);
              }
             //Parallel Reduction
-            //__syncthreads();
-            /*
+
             if(lane < 16)
-                vals[threadIdx.x] += vals[threadIdx.x + 16] ;
+                  atomicAdd(&vals[threadIdx.x] , vals[threadIdx.x + 16]) ;
             if(lane < 8 )
-                vals[threadIdx.x] += vals[threadIdx.x + 8] ;
+                  atomicAdd(&vals[threadIdx.x] , vals[threadIdx.x + 8]) ;
             if(lane < 4 )
-                vals[threadIdx.x] += vals[threadIdx.x + 4] ;
+                  atomicAdd(&vals[threadIdx.x] , vals[threadIdx.x + 4]) ;
             if(lane < 2 )
-                vals[threadIdx.x] += vals[threadIdx.x + 2 ] ;
+                  atomicAdd(&vals[threadIdx.x] , vals[threadIdx.x + 2]) ;
             if(lane < 1 )
-                vals[threadIdx.x] += vals[threadIdx.x + 1 ] ;
-              */
-               if(lane < 16)
-                    atomicAdd(&vals[threadIdx.x] , vals[threadIdx.x + 16]) ;
-                if(lane < 8 )
-                    atomicAdd(&vals[threadIdx.x] , vals[threadIdx.x + 8]) ;
-                if(lane < 4 )
-                    atomicAdd(&vals[threadIdx.x] , vals[threadIdx.x + 4]) ;
-                if(lane < 2 )
-                    atomicAdd(&vals[threadIdx.x] , vals[threadIdx.x + 2]) ;
-                if(lane < 1 )
-                    atomicAdd(&vals[threadIdx.x] , vals[threadIdx.x + 1]) ;
-
-            //for (int d = 32 >> 1; d >= 1; d >>=1 ) {
-            //  if(lane < d) vals[threadIdx.x] += vals[threadIdx.x + d] ;
-            //}
+                  atomicAdd(&vals[threadIdx.x] , vals[threadIdx.x + 1]) ;
 
 
-            //__synctreads();
-            //dmat_out[ix][iy] = sum ;
-            //printf(" sum = %d thread %d , block %d \n", sum,  col , row);
             if(lane == 0)
-              atomicAdd(&dmat_out_device[irow * K + icol] , vals[threadIdx.x]) ;
+                  atomicAdd(&dmat_out_device[irow * K + icol] , vals[threadIdx.x]) ;
             //printf("dvice matrix %d\n", dmat_out_device[row * K + col] );
       }
 
@@ -291,6 +250,10 @@ int main(int argc, char *argv[]) {
     unsigned int K = std::atoi(argv[2]);
     CSR mat = read_matrix_market_to_CSR(argv[1]);
     std::cout << mat.nrows << ' ' << mat.ncols << ' ' << mat.nnz << ' ' << K << '\n';
+
+    double timeKernelCPUstart;
+    double timeKernelCPUfinish;
+
 
     double *dmat_in = (double*)malloc(mat.ncols * K  * sizeof(double));
     double *dmat_out = (double*)malloc(mat.nrows * K * sizeof(double));
@@ -366,18 +329,27 @@ int main(int argc, char *argv[]) {
     int count = (mat.nrows- 1) / CHUNK_SIZE + 1;
     cudaStream_t * stream = new cudaStream_t[count] ;
 
+    float min=10000000000000;
+    float max=0;
+    float average=0;
+    float time;
+
+    timeKernelCPUstart=omp_get_wtime( );
+
     for (int i = 0; i < count; i++) {
       /* code */
 
           cudaStreamCreate(&stream[i]) ;
 
+          cudaEvent_t startTime, stopTime ;
+          cudaEventCreate(&startTime) ;
+          cudaEventCreate(&stopTime ) ;
+
           const int start = i * CHUNK_SIZE ;
           const int end  = min(mat.nrows , (i +1) * CHUNK_SIZE) ;
 
-          int dif= end-start;
-          //printf("end -start = %i\n ", dif);
-          //printf("stream number  = %d\n", i);
-
+          cudaEventRecord(startTime, 0);
+          cudaEventSynchronize(startTime);
 
           cudaMemcpyAsync(deviceCSRrow_indx + start , pinnedMat.row_indx + start, (end - start +1 )* sizeof(unsigned int) , cudaMemcpyHostToDevice, stream[i]) ;
 
@@ -390,7 +362,17 @@ int main(int argc, char *argv[]) {
 
           cudaMemcpyAsync( (dmat_out_GPU + start*K ), (dmat_out_device +start*K ), (end -start  ) * K * sizeof(double) , cudaMemcpyDeviceToHost, stream[i] ) ;
 
+          cudaEventRecord(stopTime , 0) ;
+          cudaEventSynchronize(stopTime);
+          cudaEventElapsedTime(&time, startTime, stopTime) ;
 
+          if(time > max)
+              max=time;
+
+          if(time < min)
+              min=time;
+
+          average = average + time;
     }
 
     for (int i = 0; i < count; i++) {
@@ -398,81 +380,32 @@ int main(int argc, char *argv[]) {
       cudaStreamDestroy(stream[i]);
     }
 
-    //dim3 dimGrid( ceil(K / TILE_WIDTH) , ceil(mat.nrows/TILE_WIDTH) , 1  ) ;
-    //dim3 dimGrid( 128,128 , 1) ;
-    //dim3 dimBlock(TILE_WIDTH, TILE_WIDTH , 1) ;
+    timeKernelCPUfinish=omp_get_wtime( );
+    check_dmat(dmat_out, dmat_out_GPU, mat.nrows, K);
 
-    //dim3 dimGrid( mat.nrows * K ,1 , 1) ; //
-    //dim3 dimGrid( MAX_BLOCK ,1 , 1) ;
-    //dim3 dimBlock(TILE_WIDTH, 1 , 1) ; //
-
-    //int count= (mat.nrows * K )/ MAX_BLOCK;
-
-
-    //int numberofBlocks= mat.nrows *K;
-    //printf("Number of blocks is %d\n", numberofBlocks);
-    //printf("Number of count is %d\n", count);
-
-    //dim3 dimGridlast( numberofBlocks-(MAX_BLOCK * count ),1 , 1) ;
-
-    //cudaEventRecord(startEvent, 0);
-
-    //Kurt method
-    /*
-    for (int i = 0; i < count; i++) {
-
-
-      //dev_opt_spmm_2<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows ,  i*MAX_BLOCK);
-      dev_opt_spmm<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows ,  i*MAX_BLOCK);
-    }
-
-    if(numberofBlocks-(MAX_BLOCK * count ) >0)
-      dev_opt_spmm<<<dimGridlast , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows ,  count*MAX_BLOCK);
-      //dev_opt_spmm_2<<<dimGridlast , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows ,  count*MAX_BLOCK);
-
-    //cudaDeviceSynchronize();
-    */
-    //dev_opt_spmm<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows); //
-
-    //cudaEventRecord(stopEvent, 0) ;
-
-    //cudaMemcpy(dmat_out_GPU , dmat_out_device , mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ; //
-
-    //cudaEventRecord(stopEventMemKer, 0) ;
-
-    //cudaEventSynchronize(startEventMemKer);
-    //cudaEventSynchronize(stopEventMemKer);
-
-
-    //std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
-    //std::cout << "CPU\n";
-    //print_dmat(dmat_out, mat.nrows , K);
-    //std::cout << "GPU\n";
-    //print_dmat(dmat_out_GPU,  mat.nrows , K);
-
-    float timeforMemKernel;
-    cudaEventElapsedTime(&timeforMemKernel, startEventMemKer, stopEventMemKer) ;
-    printf("  Time for Mem Cpy and Kernel : %f\n",  timeforMemKernel);
+    printf("  Time for Mem Cpy and Kernel : %f\n",  timeKernelCPUfinish);
 
     float timeforKernel;
     cudaEventElapsedTime(&timeforKernel, startEvent, stopEvent) ;
     printf("  Time for Kernel : %f\n",  timeforKernel);
 
-    check_dmat(dmat_out, dmat_out_GPU, mat.nrows, K);
+
 
     //Lets compute GFLOP
     unsigned int twoKnnz= 2 * K * mat.nnz ;
     printf("  2 * K * nnz : %d\n",  twoKnnz);
 
 
-    float GFLOP = (twoKnnz / timeforMemKernel )/1000000 ;
+    float GFLOP = (twoKnnz / (timeKernelCPUfinish-timeKernelCPUstart) )/1000000000 ;
     printf("  GFLOP : %f\n",  GFLOP);
 
 
-    //float GFLOP = (twoKnnz / timeforMemKernel ) ;
-    //  printf("  GFLOP : %f\n",  GFLOP);
+    average=average/count;
 
-    //print_dmat(dmat_out, mat.nrows, K);
+    printf("Min Cuda Stream Event : %f\n",  min);
+    printf("Max Cuda Stream Event : %f\n",  max);
+    printf("Average Cuda Stream Event : %f\n",  average);
+
 
 
     free(mat.row_indx);
