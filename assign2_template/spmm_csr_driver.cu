@@ -283,7 +283,7 @@ int main(int argc, char *argv[]) {
 
         int dif= end-start;
 
-        printf("end -start \n = %d", dif);
+        printf("end -start \n = %i", dif);
 
         printf("stream number \n = %d", i);
         cudaMemcpyAsync(deviceCSRrow_indx + start , pinnedMat.row_indx + start, (end - start +1 )* sizeof(unsigned int) , cudaMemcpyHostToDevice, stream[i]) ;
@@ -295,7 +295,7 @@ int main(int argc, char *argv[]) {
         dev_csr_spmm<<<dimGrid , dimBlock ,0 , stream[i] >>> ((deviceCSRrow_indx + start), deviceCSRcol_id , deviceCSRvalues  , dmat_in_device   , (dmat_out_device + start * K) , K, end -start) ;
 
 
-        printf("After Kenel \n");
+        //printf("After Kenel \n");
 
 
         //cudaMemcpy(dmat_out_GPU , dmat_out_device ,mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
