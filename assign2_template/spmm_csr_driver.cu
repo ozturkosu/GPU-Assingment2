@@ -248,7 +248,7 @@ int main(int argc, char *argv[]) {
     cudaStream_t * stream = new cudaStream_t[count] ;
 
     for (int k = 0; k < count; k++) {
-        cudaStreamCreate(&streams[k]) ;
+        cudaStreamCreate(&stream[k]) ;
 
     }
 
@@ -309,7 +309,7 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < count; i++) {
       /* code */
       cudaStreamSynchronize(stream[i]) ;
-      cduaStreamDestroy(stream[i]);
+      cudaStreamDestroy(stream[i]);
     }
 
 
@@ -325,8 +325,8 @@ int main(int argc, char *argv[]) {
     printf("  2 * K * nnz : %d\n",  twoKnnz);
 
 
-    float GFLOP = (twoKnnz / timeforMemKernel )/1000000 ;
-    printf("  GFLOP : %f\n",  GFLOP);
+    //float GFLOP = (twoKnnz / timeforMemKernel )/1000000 ;
+    //printf("  GFLOP : %f\n",  GFLOP);
 
     //print_dmat(dmat_out, mat.nrows, K);
 
