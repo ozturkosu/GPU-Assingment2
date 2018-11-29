@@ -10,7 +10,9 @@
 #include "mm_helper.hpp"
 #include "sparse_representation.hpp"
 #include <iostream>
-
+#include <omp.h>
+#include <cstdlib>
+#include <cuda.h>
 
 #define TILE_WIDTH 32
 #define MAX_BLOCK 50000
