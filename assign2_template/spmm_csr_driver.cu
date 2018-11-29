@@ -272,6 +272,7 @@ int main(int argc, char *argv[]) {
     //cudaStreamCreate(stream0) ;
 
     int chunk = mat.nrows / count + 1 ;
+    printf("chunk = %i\n ", chunk);
 
     for (int i = 0; i < count; i++) {
       /* code */
@@ -283,9 +284,9 @@ int main(int argc, char *argv[]) {
 
         int dif= end-start;
 
-        printf("end -start \n = %i", dif);
+        printf("end -start = %i\n ", dif);
 
-        printf("stream number \n = %d", i);
+        printf("stream number  = %d\n", i);
         cudaMemcpyAsync(deviceCSRrow_indx + start , pinnedMat.row_indx + start, (end - start +1 )* sizeof(unsigned int) , cudaMemcpyHostToDevice, stream[i]) ;
 
         dim3 dimGrid( ( end -start -1 -1)/TILE_WIDTH +1 , (K-1) / TILE_WIDTH + 1 ,  1  ) ;
