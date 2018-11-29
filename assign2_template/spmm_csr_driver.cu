@@ -287,7 +287,7 @@ int main(int argc, char *argv[]) {
         //cudaStreamCreate(&stream0) ;
 
 
-        dev_csr_spmm<<<dimGrid , dimBlock ,0 , stream[i] >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows) ;
+        dev_csr_spmm<<<dimGrid , dimBlock ,0 , stream[i] >>>(deviceCSRrow_indx + start, deviceCSRcol_id + start, deviceCSRvalues + start , dmat_in_device + start * K  , dmat_out_device + start * K , end -start) ;
 
         //cudaEventRecord(stopEvent, 0) ;
         //cudaEventSynchronize(stopEvent);
@@ -304,7 +304,7 @@ int main(int argc, char *argv[]) {
         //print_CSR(mat);
 
         //cudaMemcpy(dmat_out_GPU , dmat_out_device ,mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
-        cudaMemcpyAsync(dmat_out_GPU + start , dmat_out_device +start , (start - end +1) * K * sizeof(double) , cudaMemcpyDeviceToHost, stream[i] ) ;
+        cudaMemcpyAsync(dmat_out_GPU + start*K , dmat_out_device +start*K , (start - end +1) * K * sizeof(double) , cudaMemcpyDeviceToHost, stream[i] ) ;
 
 
         //cudaEventRecord(stopEventMemKer, 0) ;
