@@ -263,7 +263,7 @@ int main(int argc, char *argv[]) {
       /* code */
 
         const int start = i * CHUNK_SIZE ;
-        const int end  = min(mat.nrwos , (i +1) *CHUNK_SIZE) ;
+        const int end  = min(mat.nrows , (i +1) *CHUNK_SIZE) ;
 
         //Initialize the Grid and Block Dimension
 
