@@ -255,7 +255,7 @@ int main(int argc, char *argv[]) {
     float min=10000000000000;
     float max=0;
     float average=0;
-    float time=inf;
+    float time;
 
     for (int i = 0; i < count; i++) {
       /* code */
