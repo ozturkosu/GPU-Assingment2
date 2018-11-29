@@ -284,9 +284,9 @@ int main(int argc, char *argv[]) {
 
         int dif= end-start;
 
-        printf("end -start = %i\n ", dif);
+        //printf("end -start = %i\n ", dif);
 
-        printf("stream number  = %d\n", i);
+        //printf("stream number  = %d\n", i);
         cudaMemcpyAsync(deviceCSRrow_indx + start , pinnedMat.row_indx + start, (end - start +1 )* sizeof(unsigned int) , cudaMemcpyHostToDevice, stream[i]) ;
 
         dim3 dimGrid( ( end -start -1 -1)/TILE_WIDTH +1 , (K-1) / TILE_WIDTH + 1 ,  1  ) ;
@@ -313,12 +313,12 @@ int main(int argc, char *argv[]) {
     }
 
 
-    std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
-    std::cout << "CPU\n";
-    print_dmat(dmat_out, mat.nrows , K);
-    std::cout << "GPU\n";
-    print_dmat(dmat_out_GPU,  mat.nrows , K);
-    check_dmat(dmat_out, dmat_out_GPU, mat.nrows, K);
+    //std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
+    //std::cout << "CPU\n";
+    //print_dmat(dmat_out, mat.nrows , K);
+    //std::cout << "GPU\n";
+    //print_dmat(dmat_out_GPU,  mat.nrows , K);
+    //check_dmat(dmat_out, dmat_out_GPU, mat.nrows, K);
 
     //Lets compute GFLOP
     unsigned int twoKnnz= 2 * K * mat.nnz ;
