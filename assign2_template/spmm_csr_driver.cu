@@ -273,9 +273,6 @@ int main(int argc, char *argv[]) {
 
         //Initialize the Grid and Block Dimension
 
-        //dim3 dimGrid( (K-1) / TILE_WIDTH + 1 , ( mat.nrows-1)/TILE_WIDTH +1 , 1  ) ;
-        dim3 dimGrid( ( end -start -1)/TILE_WIDTH +1 , (K-1) / TILE_WIDTH + 1 ,  1  ) ;
-        dim3 dimBlock(TILE_WIDTH , TILE_WIDTH , 1) ;
 
         //cudaEventRecord(startEvent, 0);
         //cudaStreamCreate(&streams[i]) ;
@@ -285,6 +282,10 @@ int main(int argc, char *argv[]) {
 
         //cudaStreamSynchronize(stream0);
         //cudaStreamCreate(&stream0) ;
+
+        //dim3 dimGrid( (K-1) / TILE_WIDTH + 1 , ( mat.nrows-1)/TILE_WIDTH +1 , 1  ) ;
+        dim3 dimGrid( ( end -start -1 -1)/TILE_WIDTH +1 , (K-1) / TILE_WIDTH + 1 ,  1  ) ;
+        dim3 dimBlock(TILE_WIDTH , TILE_WIDTH , 1) ;
 
 
         dev_csr_spmm<<<dimGrid , dimBlock ,0 , stream[i] >>> (deviceCSRrow_indx + start, deviceCSRcol_id + start, deviceCSRvalues + start , dmat_in_device + start * K  , dmat_out_device + start * K , K, end -start) ;
