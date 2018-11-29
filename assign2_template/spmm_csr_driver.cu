@@ -272,7 +272,7 @@ int main(int argc, char *argv[]) {
     //cudaStreamCreate(stream0) ;
 
     //int chunk = mat.nrows / count + 1 ;
-    printf("chunk = %i\n ", chunk);
+    //printf("chunk = %i\n ", chunk);
 
     for (int i = 0; i < count; i++) {
       /* code */
