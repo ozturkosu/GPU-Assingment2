@@ -18,6 +18,13 @@
 #define TILE_WIDTH 32
 #define CHUNK_SIZE 100
 
+
+#define min(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a < _b ? _a : _b; })
+
+
 void check_dmat(double* a, double *b,  int n,  int K, bool quit_on_err = true ) {
     for ( int i = 0; i < n; ++i) {
         for ( int k = 0; k < K; ++k) {
@@ -270,51 +277,20 @@ int main(int argc, char *argv[]) {
         const int start = i * chunk ;
         const int end  = min(mat.nrows , (i +1) * chunk) ;
 
-        //Initialize the Grid and Block Dimension
 
-
-        //cudaEventRecord(startEvent, 0);
-        //cudaStreamCreate(&streams[i]) ;
 
         cudaMemcpyAsync(deviceCSRrow_indx + start , pinnedMat.row_indx + start,(start - end +1 )* sizeof(unsigned int) , cudaMemcpyHostToDevice, stream[i]) ;
 
-
-        //cudaStreamSynchronize(stream0);
-        //cudaStreamCreate(&stream0) ;
-
-        //dim3 dimGrid( (K-1) / TILE_WIDTH + 1 , ( mat.nrows-1)/TILE_WIDTH +1 , 1  ) ;
         dim3 dimGrid( ( end -start -1 -1)/TILE_WIDTH +1 , (K-1) / TILE_WIDTH + 1 ,  1  ) ;
         dim3 dimBlock(TILE_WIDTH , TILE_WIDTH , 1) ;
 
 
         dev_csr_spmm<<<dimGrid , dimBlock ,0 , stream[i] >>> (deviceCSRrow_indx + start, deviceCSRcol_id , deviceCSRvalues  , dmat_in_device   , dmat_out_device + start * K , K, end -start) ;
 
-        //cudaEventRecord(stopEvent, 0) ;
-        //cudaEventSynchronize(stopEvent);
-
-        //float timeforKernel;
-        //cudaEventElapsedTime(&timeforKernel, startEvent, stopEvent) ;
-
-        //printf("  Time for Kernel : %f\n",  timeforKernel);
-
-        //cudaDeviceSynchronize() ;
-        //std::cout << "GPU out matrix before kernel\n";
-        //print_dmat(dmat_out_GPU,  mat.nrows , K);
-
-        //print_CSR(mat);
-
         //cudaMemcpy(dmat_out_GPU , dmat_out_device ,mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
         cudaMemcpyAsync(dmat_out_GPU + start*K , dmat_out_device +start*K , (start - end ) * K * sizeof(double) , cudaMemcpyDeviceToHost, stream[i] ) ;
 
 
-        //cudaEventRecord(stopEventMemKer, 0) ;
-
-        //cudaEventSynchronize(startEventMemKer);
-        //cudaEventSynchronize(stopEventMemKer);
-
-        //float timeforMemKernel;
-        //cudaEventElapsedTime(&timeforMemKernel, startEventMemKer, stopEventMemKer) ;
-        //printf("  Time for Mem Cpy and Kernel : %f\n",  timeforMemKernel);
 
     }
 
