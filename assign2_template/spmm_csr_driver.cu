@@ -242,19 +242,15 @@ int main(int argc, char *argv[]) {
     */
 
 
-    const int count = (mat.nrows -1 ) / CHUNK_SIZE +1 ;
-    cudaStream_t * stream = new cudaStream_t[count] ;
-    cudaStream_t stream0 ;
+    const int count = (mat.nrows ) / CHUNK_SIZE +1 ;
 
+    cudaMemcpyAsync(deviceCSRcol_id , pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice ,0);
+    cudaMemcpyAsync(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice , 0)  ;
+    cudaMemcpyAsync( dmat_in_device  , dmat_in  , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice , 0 ) ;
 
     //cudaStreamCreate(stream0) ;
 
-    cudaMemcpyAsync(deviceCSRrow_indx , pinnedMat.row_indx ,(mat.nrows+1) * sizeof(unsigned int) , cudaMemcpyHostToDevice, stream0) ;
-    cudaMemcpyAsync(deviceCSRcol_id , pinnedMat.col_id , mat.nnz * sizeof(unsigned int) , cudaMemcpyHostToDevice , stream0);
-    cudaMemcpyAsync(deviceCSRvalues , pinnedMat.values , mat.nnz * sizeof(double) , cudaMemcpyHostToDevice , stream0 )  ;
-    cudaMemcpyAsync( dmat_in_device , dmat_in , mat.ncols * K * sizeof(double) , cudaMemcpyHostToDevice , stream0 ) ;
-      cudaStreamSynchronize(stream0);
-      cudaStreamCreate(&stream0) ;
+
 
     for (int i = 0; i < count; i++) {
       /* code */
@@ -273,7 +269,11 @@ int main(int argc, char *argv[]) {
         //cudaEventRecord(startEvent, 0);
         //cudaStreamCreate(&streams[i]) ;
 
+        cudaMemcpyAsync(deviceCSRrow_indx + start , pinnedMat.row_indx + start,(start - end +1 )* sizeof(unsigned int) , cudaMemcpyHostToDevice, stream[i]) ;
 
+
+        //cudaStreamSynchronize(stream0);
+        //cudaStreamCreate(&stream0) ;
 
 
         dev_csr_spmm<<<dimGrid , dimBlock ,0 , stream[i] >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows) ;
@@ -293,7 +293,7 @@ int main(int argc, char *argv[]) {
         //print_CSR(mat);
 
         //cudaMemcpy(dmat_out_GPU , dmat_out_device ,mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ;
-        cudaMemcpyAsync(dmat_out_GPU , dmat_out_device ,mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost, stream[i] ) ;
+        cudaMemcpyAsync(dmat_out_GPU + start , dmat_out_device +start , (start - end +1) * K * sizeof(double) , cudaMemcpyDeviceToHost, stream[i] ) ;
 
 
         //cudaEventRecord(stopEventMemKer, 0) ;
