@@ -223,7 +223,7 @@ int main(int argc, char *argv[]) {
     printf("malloc for CPU and GPU\n");
 
     cudaMalloc((void**) &deviceCSRrow_indx ,(mat.nrows +1) * sizeof(unsigned int)) ;
-    cudaMemset(deviceCSRrow_indx , 0 ,(mat.nrows +1) * sizeof(unsigned int) ) ;
+    //cudaMemset(deviceCSRrow_indx , 0 ,(mat.nrows +1) * sizeof(unsigned int) ) ;
 
     cudaMalloc((void**) &deviceCSRcol_id , mat.nnz * sizeof(unsigned int)) ;
     cudaMalloc((void**) &deviceCSRvalues , mat.nnz * sizeof(double)) ;
@@ -236,7 +236,7 @@ int main(int argc, char *argv[]) {
     double *dmat_out_device ;
     cudaMalloc((void**) &dmat_out_device, mat.nrows * K * sizeof(double)) ;
 
-    cudaMemset(dmat_out_device , 0 , mat.nrows * K * sizeof(double)) ;
+    //cudaMemset(dmat_out_device , 0 , mat.nrows * K * sizeof(double)) ;
 
     //We want to use pinned memory
 
