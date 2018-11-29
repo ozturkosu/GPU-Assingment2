@@ -181,8 +181,6 @@ int main(int argc, char *argv[]) {
     cudaEventCreate(&stopEventMemKer) ;
 
 
-
-
     //Lets implement pinned memory
     CSR pinnedMat;
     cudaHostAlloc(&pinnedMat.row_indx , (mat.nrows +1)* sizeof(unsigned int), cudaHostAllocMapped ) ;
@@ -246,7 +244,7 @@ int main(int argc, char *argv[]) {
 
     const int count = (mat.nrows -1 ) / CHUNK_SIZE +1 ;
     cudaStream_t * stream = new cudaStream_t[count] ;
-    cudaStream_t stream0 ;
+    //cudaStream_t stream0 ;
 
 
     //cudaStreamCreate(stream0) ;
@@ -273,6 +271,8 @@ int main(int argc, char *argv[]) {
 
         //cudaEventRecord(startEvent, 0);
         //cudaStreamCreate(&streams[i]) ;
+
+
 
 
         dev_csr_spmm<<<dimGrid , dimBlock ,0 , stream[i] >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows) ;
@@ -343,7 +343,7 @@ int main(int argc, char *argv[]) {
     cudaFreeHost(pinnedMat.col_id) ;
     cudaFreeHost(pinnedMat.values) ;
 
-    delete stream;
+    delete [] stream;
 
     //cudaFree(device_nrows) ;
     //cudaFree(device_ncols) ;
