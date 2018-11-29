@@ -279,6 +279,7 @@ int main(int argc, char *argv[]) {
 
 
         cudaEventRecord(startTime, 0);
+        cudaEventSynchronize(startTime);
         //printf("stream number  = %d\n", i);
         cudaMemcpyAsync(deviceCSRrow_indx + start , pinnedMat.row_indx + start, (end - start +1 )* sizeof(unsigned int) , cudaMemcpyHostToDevice, stream[i]) ;
 
@@ -291,6 +292,7 @@ int main(int argc, char *argv[]) {
         cudaMemcpyAsync( (dmat_out_GPU + start*K ), (dmat_out_device +start*K ), (end -start  ) * K * sizeof(double) , cudaMemcpyDeviceToHost, stream[i] ) ;
 
         cudaEventRecord(stopTime , 0) ;
+        cudaEventSynchronize(stopTime);
         cudaEventElapsedTime(&time, startTime, stopTime) ;
 
         if(time > max)

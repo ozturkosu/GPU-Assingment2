@@ -364,12 +364,12 @@ int main(int argc, char *argv[]) {
 
           cudaMemcpyAsync(deviceCSRrow_indx + start , pinnedMat.row_indx + start, (end - start +1 )* sizeof(unsigned int) , cudaMemcpyHostToDevice, stream[i]) ;
 
-          //dim3 dimGrid( ( end -start  ) *K, 1 ,  1  ) ; //for dev_opt_spmm
+          dim3 dimGrid( ( end -start  ) *K +1 , 1 ,  1  ) ; //for dev_opt_spmm
 
-          dim3 dimGrid( ( end -start  ) +1 , 1 ,  1  ) ;
+          //dim3 dimGrid(  end -start   +1 , 1 ,  1  ) ;
           dim3 dimBlock(TILE_WIDTH, 1 , 1) ; //
 
-          dev_opt_spmm_2<<<dimGrid ,  dimBlock , 0, stream[i] >>>(deviceCSRrow_indx + start, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , (dmat_out_device + start * K ), K , end-start); //
+          dev_opt_spmm<<<dimGrid ,  dimBlock , 0, stream[i] >>>(deviceCSRrow_indx + start, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , (dmat_out_device + start * K ), K , end-start); //
 
           cudaMemcpyAsync( (dmat_out_GPU + start*K ), (dmat_out_device +start*K ), (end -start  ) * K * sizeof(double) , cudaMemcpyDeviceToHost, stream[i] ) ;
 
@@ -417,14 +417,14 @@ int main(int argc, char *argv[]) {
     */
     //dev_opt_spmm<<<dimGrid , dimBlock >>>(deviceCSRrow_indx, deviceCSRcol_id, deviceCSRvalues , dmat_in_device , dmat_out_device , K , mat.nrows); //
 
-    cudaEventRecord(stopEvent, 0) ;
+    //cudaEventRecord(stopEvent, 0) ;
 
     //cudaMemcpy(dmat_out_GPU , dmat_out_device , mat.nrows * K * sizeof(double) , cudaMemcpyDeviceToHost ) ; //
 
-    cudaEventRecord(stopEventMemKer, 0) ;
+    //cudaEventRecord(stopEventMemKer, 0) ;
 
-    cudaEventSynchronize(startEventMemKer);
-    cudaEventSynchronize(stopEventMemKer);
+    //cudaEventSynchronize(startEventMemKer);
+    //cudaEventSynchronize(stopEventMemKer);
 
 
     std::cout << "replace one argument to the below function with the values from gpu " << std::endl;
@@ -453,7 +453,7 @@ int main(int argc, char *argv[]) {
 
 
     //float GFLOP = (twoKnnz / timeforMemKernel ) ;
-  //  printf("  GFLOP : %f\n",  GFLOP);
+    //  printf("  GFLOP : %f\n",  GFLOP);
 
     //print_dmat(dmat_out, mat.nrows, K);
 
